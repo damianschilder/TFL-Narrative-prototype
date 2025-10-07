@@ -5,29 +5,27 @@
     <div class="absolute bottom-0 right-0 w-[50rem] h-[50rem] bg-purple-500/30 rounded-full blur-[10rem] translate-x-1/2"></div>
 
     <div class="relative z-20 flex flex-col min-h-screen">
-      
       <main class="flex-grow flex flex-col items-center justify-center text-center w-full px-4 sm:px-6 lg:px-8 py-12">
         <h1 class="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-4">
           Maak je verhaal
         </h1>
         <p class="text-lg text-muted-foreground mb-12 max-w-xl">
-          Upload een bestand, plak je tekst, of kies een voorbeeldtekst en wij maken er een interactieve leerervaring van.
+          Kies een onderwerp of upload een bestand en wij maken er een interactieve leerervaring van.
         </p>
 
         <div class="w-full max-w-5xl">
           <div class="border-b border-border/50">
             <div class="flex gap-2">
-              <button 
-                @click="activeTab = 'paste'"
+              <button
+                @click="activeTab = 'start'"
                 :class="[
                   'relative px-4 py-3 text-sm font-bold transition-colors',
-                  activeTab === 'paste' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+                  activeTab === 'start' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
                 ]"
               >
-                <span>Tekst Plakken</span>
-                <span v-if="activeTab === 'paste'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"></span>
+                <span>Start een Verhaal</span>
               </button>
-              <button 
+              <button
                 @click="activeTab = 'upload'"
                 :class="[
                   'relative px-4 py-3 text-sm font-bold transition-colors',
@@ -35,41 +33,28 @@
                 ]"
               >
                 <span>Bestand Uploaden</span>
-                 <span v-if="activeTab === 'upload'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"></span>
               </button>
             </div>
           </div>
 
           <div class="py-8">
             <transition name="fade" mode="out-in">
-              <div v-if="activeTab === 'paste'" class="space-y-8">
-                <div class="space-y-4 text-left">
-                  <h3 class="text-lg font-bold text-foreground px-4">Kies een Voorbeeldtekst</h3>
-                  <div class="flex flex-wrap gap-3 px-4">
-                    <button 
-                      v-for="item in predefinedTexts" 
-                      :key="item.title" 
-                      @click="selectText(item.text)"
-                      class="px-4 py-2 rounded-lg text-sm font-medium bg-[#1b212d] text-secondary-foreground/70 hover:bg-secondary hover:text-secondary-foreground transition-colors"
-                    >
-                      {{ item.title }}
-                    </button>
-                  </div>
-                </div>
-                <div class="px-4">
-                  <textarea 
-                    v-model="inputText" 
-                    class="w-full min-h-60 resize-y rounded-lg border-border/80 text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/50 transition-all p-4" 
-                    placeholder="Plak hier je tekst..."
-                  ></textarea>
-                </div>
-                <div class="flex justify-end px-4">
-                  <button @click="generateStoryFromText" :disabled="loading" class="h-10 px-6 flex items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-bold tracking-wide hover:bg-primary/90 transition-colors disabled:opacity-50">
-                    <span v-if="!loading">Genereer Verhaal</span>
-                    <svg v-else class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
+              <div v-if="activeTab === 'start'" class="space-y-4 text-left">
+                <h3 class="text-lg font-bold text-foreground px-4">Kies een beschikbaar onderwerp</h3>
+                <div class="flex flex-wrap gap-3 px-4">
+                  <button
+                    v-for="topic in predefinedTopics"
+                    :key="topic.title"
+                    @click="startTopic(topic)"
+                    :disabled="!topic.active"
+                    :class="[
+                      'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+                      topic.active
+                        ? 'bg-[#1b212d] text-secondary-foreground/70 hover:bg-secondary hover:text-secondary-foreground'
+                        : 'bg-secondary/20 text-muted-foreground/50 cursor-not-allowed opacity-50'
+                    ]"
+                  >
+                    {{ topic.title }}
                   </button>
                 </div>
               </div>
@@ -77,7 +62,6 @@
               <div v-else class="flex flex-col items-center space-y-6">
                 <div @dragover.prevent @drop.prevent="handleFileDrop" @click="triggerFileInput" class="w-full p-10 border-2 border-dashed border-border/50 rounded-xl text-center cursor-pointer hover:border-primary/50 transition-colors">
                   <input type="file" ref="fileInput" @change="handleFileSelect" class="hidden" accept=".txt,.pdf,.docx">
-                  
                   <div v-if="loading" class="flex flex-col items-center justify-center space-y-4">
                     <svg class="animate-spin h-8 w-8 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -85,7 +69,6 @@
                     </svg>
                     <p class="text-lg font-medium text-foreground">Verhaal wordt gegenereerd...</p>
                   </div>
-
                   <div v-else class="flex flex-col items-center gap-4">
                      <div class="w-20 h-20 mx-auto rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center backdrop-blur-sm">
                       <span class="material-symbols-outlined text-primary text-4xl">upload_file</span>
@@ -109,21 +92,22 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { texts as predefinedTexts } from '../data/predefinedTexts.ts';
+import { topics as predefinedTopics } from '../data/predefinedTopics.ts';
 
 useHead({
   title: 'Maak je verhaal',
 });
 
-const activeTab = ref('paste');
-const inputText = ref('');
+const activeTab = ref('start');
 const fileInput = ref(null);
 const selectedFile = ref(null);
 const loading = ref(false);
 const router = useRouter();
 
-const selectText = (text) => {
-  inputText.value = text;
+const startTopic = (topic) => {
+  if (!topic.active) return;
+  sessionStorage.removeItem('studentState');
+  router.push('/story');
 };
 
 const triggerFileInput = () => {
@@ -145,12 +129,18 @@ const handleFileDrop = (event) => {
   handleFileChange(event.dataTransfer.files[0]);
 };
 
-async function generateStory(apiEndpoint, body) {
+async function generateStoryFromFile() {
+  if (!selectedFile.value) {
+    return alert('Selecteer alsjeblieft een bestand.');
+  }
   loading.value = true;
+  const formData = new FormData();
+  formData.append('file', selectedFile.value);
+
   try {
-    const responseData = await $fetch(apiEndpoint, {
+    const responseData = await $fetch('/api/generateFromFile', {
       method: 'POST',
-      body: body
+      body: formData
     });
     sessionStorage.setItem('storyData', JSON.stringify(responseData));
     router.push({ path: '/story' });
@@ -162,26 +152,9 @@ async function generateStory(apiEndpoint, body) {
     selectedFile.value = null;
   }
 }
-
-function generateStoryFromText() {
-  if (!inputText.value.trim()) {
-    return alert('Voer alsjeblieft wat tekst in.');
-  }
-  generateStory('/api/generate', { text: inputText.value });
-}
-
-function generateStoryFromFile() {
-  if (!selectedFile.value) {
-    return alert('Selecteer alsjeblieft een bestand.');
-  }
-  const formData = new FormData();
-  formData.append('file', selectedFile.value);
-  generateStory('/api/generateFromFile', formData);
-}
 </script>
 
 <style>
-/* Zorgt ervoor dat de Google Icons correct worden weergegeven */
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
@@ -207,7 +180,6 @@ body {
 .fade-leave-to {
   opacity: 0;
 }
-/* NIEUW: Specifieke achtergrondkleur voor de textarea */
 textarea {
   background-color: #1b212d;
 }

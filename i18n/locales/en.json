@@ -36,5 +36,9 @@
       "correct": "Correct!",
       "incorrect": "Unfortunately, not correct."
     }
+  },
+  "progress": {
+    "title": "Your Knowledge Map",
+    "subtitle": "Track your learning progress for each knowledge component below."
   }
 }

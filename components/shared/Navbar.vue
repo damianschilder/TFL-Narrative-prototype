@@ -1,3 +1,4 @@
+// /components/shared/Navbar.vue
 <template>
   <header class="sticky top-0 z-40 w-full border-b border-border bg-background/60 backdrop-blur-lg">
     <div class="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -25,6 +26,6 @@
 </template>
 
 <script setup>
-const { t } = useI18n()
-const localePath = useLocalePath()
+const { t } = useI18n();
+const localePath = useLocalePath();
 </script>

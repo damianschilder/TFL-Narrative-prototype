@@ -36,5 +36,9 @@
       "correct": "Correct!",
       "incorrect": "Helaas, niet correct."
     }
+  },
+  "progress": {
+    "title": "Jouw Kenniskaart",
+    "subtitle": "Volg hier je leervoortgang voor elk kenniscomponent."
   }
 }

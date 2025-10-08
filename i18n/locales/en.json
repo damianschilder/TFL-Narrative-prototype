@@ -1,0 +1,40 @@
+{
+  "nav": {
+    "start": "Start",
+    "progress": "My Progress"
+  },
+  "home": {
+    "title": "Create your story",
+    "subtitle": "Choose a topic or upload a file and we will turn it into an interactive learning experience.",
+    "tabs": {
+      "story": "Start a Story",
+      "upload": "Upload File"
+    },
+    "topics": {
+      "title": "Choose an available topic"
+    },
+    "upload": {
+      "loading": "Generating story...",
+      "title_selected": "File selected",
+      "title_upload": "Upload File",
+      "prompt": "Drag your file here or click to browse",
+      "supported_files": "Supported file types: .txt, .pdf, .docx"
+    }
+  },
+  "story": {
+    "title": "The Story",
+    "loading_text": "Preparing the next challenge...",
+    "completion": {
+      "title": "Fantastic!",
+      "subtitle": "You have mastered all knowledge components for this topic.",
+      "button": "View your Knowledge Map"
+    },
+    "story_title": "The Story",
+    "quiz": {
+      "title": "Test your Knowledge",
+      "button": "Check Answer",
+      "correct": "Correct!",
+      "incorrect": "Unfortunately, not correct."
+    }
+  }
+}

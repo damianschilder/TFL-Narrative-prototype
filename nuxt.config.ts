@@ -1,6 +1,10 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
+// /nuxt.config.ts
+
+import { defineNuxtConfig } from 'nuxt/config'
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
+
   devtools: { enabled: true },
 
   nitro: {
@@ -14,13 +18,34 @@ export default defineNuxtConfig({
     }
   },
 
-  modules: ['@nuxtjs/tailwindcss'],
+  modules: [
+    '@nuxtjs/tailwindcss',
+    '@nuxtjs/i18n',
+  ],
 
-  // Dit blok is toegevoegd
+  i18n: {
+    strategy: 'prefix_except_default',
+    langDir: 'locales', // This now works because the folder is inside /i18n/
+    locales: [
+      {
+        code: 'nl',
+        name: 'Nederlands',
+        file: 'nl.json' // Use simple filename
+      },
+      {
+        code: 'en',
+        name: 'English',
+        file: 'en.json' // Use simple filename
+      }
+    ],
+    defaultLocale: 'en',
+  },
+
+  css: ['~/assets/css/main.css'],
+
   app: {
     head: {
       link: [
-        // De link voor de Google Material Symbols
         { 
           rel: 'stylesheet', 
           href: 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined' 

@@ -1,0 +1,40 @@
+{
+  "nav": {
+    "start": "Start",
+    "progress": "Mijn Voortgang"
+  },
+  "home": {
+    "title": "Maak je verhaal",
+    "subtitle": "Kies een onderwerp of upload een bestand en wij maken er een interactieve leerervaring van.",
+    "tabs": {
+      "story": "Start een Verhaal",
+      "upload": "Bestand Uploaden"
+    },
+    "topics": {
+      "title": "Kies een beschikbaar onderwerp"
+    },
+    "upload": {
+      "loading": "Verhaal wordt gegenereerd...",
+      "title_selected": "Bestand geselecteerd",
+      "title_upload": "Bestand Uploaden",
+      "prompt": "Sleep je bestand hier of klik om te bladeren",
+      "supported_files": "Ondersteunde bestandstypen: .txt, .pdf, .docx"
+    }
+  },
+  "story": {
+    "title": "Het Verhaal",
+    "loading_text": "Volgende uitdaging wordt voorbereid...",
+    "completion": {
+      "title": "Fantastisch!",
+      "subtitle": "Je hebt alle kenniscomponenten voor dit onderwerp onder de knie.",
+      "button": "Bekijk je Kenniskaart"
+    },
+    "story_title": "Het Verhaal",
+    "quiz": {
+      "title": "Test je Kennis",
+      "button": "Controleer Antwoord",
+      "correct": "Correct!",
+      "incorrect": "Helaas, niet correct."
+    }
+  }
+}

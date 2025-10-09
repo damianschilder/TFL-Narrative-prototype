@@ -1,50 +1,71 @@
 // /utils/studentModel.ts
-import { domainKnowledge, type KnowledgeComponent } from "~/data/domainModel";
+import { topics, type Topic } from '~/data/topics';
+import type { KnowledgeComponent } from '~/data/ww2DomainModel';
 
-// Interface voor de staat van een enkele KC
-export interface KCState {
-  kcId: string;
-  mastery: number; // Waarschijnlijkheid dat de student dit beheerst (0.0 tot 1.0)
+// Interface for the state of a single KC
+export interface StudentKCState {
+  mastery: number; // Probability that the student knows this (0.0 to 1.0)
   attempts: number;
-  correct: number;
 }
 
-// BKT parameters (vereenvoudigd)
-const P_INIT = 0.25;      // Startkans op kennis
-const P_TRANSIT = 0.15;   // Kans om te leren na een poging
-const P_GUESS = 0.20;     // Kans op goed gokken
-const P_SLIP = 0.10;      // Kans op fout maken ondanks kennis
+// BKT Parameters
+const P_INIT = 0.25;      // Initial probability of knowing the concept
+const P_TRANSIT = 0.15;   // Probability of learning after an attempt
+const P_GUESS = 0.20;     // Probability of guessing correctly
+const P_SLIP = 0.10;      // Probability of making a mistake despite knowing
 
-// Haalt de volledige studentstaat op
-export function getStudentState(): KCState[] {
-  const storedState = sessionStorage.getItem('studentState');
-  if (storedState) {
-    return JSON.parse(storedState);
-  }
-  // Initialiseer de staat als deze niet bestaat
-  const initialState = domainKnowledge.map(kc => ({
-    kcId: kc.id,
-    mastery: P_INIT,
-    attempts: 0,
-    correct: 0,
-  }));
-  sessionStorage.setItem('studentState', JSON.stringify(initialState));
-  return initialState;
-}
+const MASTERY_THRESHOLD = 0.95; // Threshold to consider a KC as mastered
 
-// Slaat de studentstaat op
-function saveStudentState(state: KCState[]) {
+// --- Topic and State Management ---
+
+const getActiveTopic = (): Topic | null => {
+  if (typeof window === 'undefined') return null;
+  const activeTopicKey = sessionStorage.getItem('activeTopicKey');
+  if (!activeTopicKey) return null;
+  return topics.find(t => t.key === activeTopicKey) || null;
+};
+
+export const getStudentState = (): { [kcId: string]: StudentKCState } | null => {
+  if (typeof window === 'undefined') return null;
+  const stateStr = sessionStorage.getItem('studentState');
+  return stateStr ? JSON.parse(stateStr) : null;
+};
+
+const saveStudentState = (state: { [kcId: string]: StudentKCState }): void => {
   sessionStorage.setItem('studentState', JSON.stringify(state));
-}
+};
 
-// Update de beheersing van een KC na een antwoord
-export function updateKCMastery(kcId: string, isCorrect: boolean) {
+export const initializeStudentState = (topicKey: string): void => {
+  const topic = topics.find(t => t.key === topicKey);
+  if (!topic) {
+    console.error('[studentModel] Topic not found for key:', topicKey);
+    return;
+  }
+  
+  sessionStorage.setItem('activeTopicKey', topicKey);
+
+  const initialState: { [kcId: string]: StudentKCState } = {};
+  for (const kc of topic.domainKnowledge) {
+    initialState[kc.id] = { mastery: P_INIT, attempts: 0 };
+  }
+  // --- ADDED LOG ---
+  console.log('[studentModel] Initialized student state for topic:', topicKey, initialState);
+  saveStudentState(initialState);
+};
+
+// --- BKT Logic ---
+
+export function updateKCMastery(kcId: string, isCorrect: boolean): void {
   const state = getStudentState();
-  const kcState = state.find(s => s.kcId === kcId);
-  if (!kcState) return;
+  if (!state || !state[kcId]) {
+    console.error('[studentModel] Could not find state to update for KC:', kcId);
+    return;
+  }
 
+  const kcState = state[kcId];
+  // --- ADDED LOG ---
+  console.log(`[studentModel] Updating KC: ${kcId}. Correct: ${isCorrect}. Current mastery: ${kcState.mastery}`);
   kcState.attempts += 1;
-  if (isCorrect) kcState.correct += 1;
   
   const pKnown = kcState.mastery;
   let pNewKnown;
@@ -60,25 +81,50 @@ export function updateKCMastery(kcId: string, isCorrect: boolean) {
   }
   
   kcState.mastery = pNewKnown + (1 - pNewKnown) * P_TRANSIT;
+  // --- ADDED LOG ---
+  console.log(`[studentModel] BKT calculation complete. P(Known) after evidence: ${pNewKnown}. New mastery after transit: ${kcState.mastery}`);
   saveStudentState(state);
+  // --- ADDED LOG ---
+  console.log('[studentModel] New student state saved.');
 }
 
-// Kiest de volgende KC om te leren
 export function selectNextKC(): KnowledgeComponent | null {
+  const topic = getActiveTopic();
   const state = getStudentState();
-  
-  for (const kc of domainKnowledge) {
-    const kcState = state.find(s => s.kcId === kc.id);
-    if (!kcState || kcState.mastery < 0.95) { // Drempel voor beheersing
-      // Check of vereisten zijn voldaan
-      if (!kc.dependsOn || kc.dependsOn.every(depId => {
-        const depState = state.find(s => s.kcId === depId);
-        return depState && depState.mastery >= 0.95;
-      })) {
-        return kc; // Dit is de volgende KC
+
+  // --- ADDED LOG ---
+  console.log('[studentModel] Selecting next KC...');
+
+  if (!topic || !state) {
+    console.warn('[studentModel] No active topic or student state found.');
+    return null;
+  }
+
+  // --- ADDED LOG ---
+  console.log('[studentModel] Current student state:', state);
+
+  for (const kc of topic.domainKnowledge) {
+    const kcState = state[kc.id];
+    if (kcState && kcState.mastery < MASTERY_THRESHOLD) {
+      // --- ADDED LOG ---
+      console.log(`[studentModel] Checking candidate KC: ${kc.id} (Mastery: ${kcState.mastery})`);
+      const dependenciesMet = !kc.dependsOn || kc.dependsOn.every(depId => {
+        const depState = state[depId];
+        const isMet = depState && depState.mastery >= MASTERY_THRESHOLD;
+        // --- ADDED LOG ---
+        console.log(`[studentModel]   - Checking dependency ${depId}: Mastery=${depState?.mastery}, Met=${isMet}`);
+        return isMet;
+      });
+
+      if (dependenciesMet) {
+        // --- ADDED LOG ---
+        console.log(`[studentModel] Found next KC to learn: ${kc.id}. Dependencies met.`);
+        return kc; // This is the next KC to learn
       }
     }
   }
   
-  return null; // Alles is geleerd!
+  // --- ADDED LOG ---
+  console.log('[studentModel] No suitable KC found. All KCs may be mastered.');
+  return null; // All KCs for this topic are learned
 }

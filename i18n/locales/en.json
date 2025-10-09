@@ -1,44 +1,39 @@
 {
   "nav": {
     "start": "Start",
-    "progress": "My Progress"
+    "progress": "Progress"
   },
   "home": {
-    "title": "Create your story",
-    "subtitle": "Choose a topic or upload a file and we will turn it into an interactive learning experience.",
-    "tabs": {
-      "story": "Start a Story",
-      "upload": "Upload File"
-    },
-    "topics": {
-      "title": "Choose an available topic"
-    },
-    "upload": {
-      "loading": "Generating story...",
-      "title_selected": "File selected",
-      "title_upload": "Upload File",
-      "prompt": "Drag your file here or click to browse",
-      "supported_files": "Supported file types: .txt, .pdf, .docx"
-    }
+    "title": "Narrative Learning",
+    "subtitle": "An adaptive learning system that transforms complex topics into engaging narratives to reduce cognitive load.",
+    "topic_selection_title": "Choose a Topic to Begin",
+    "reset_progress": "Reset All Progress"
   },
   "story": {
-    "title": "The Story",
-    "loading_text": "Preparing the next challenge...",
-    "completion": {
-      "title": "Fantastic!",
-      "subtitle": "You have mastered all knowledge components for this topic.",
-      "button": "View your Knowledge Map"
-    },
-    "story_title": "The Story",
+    "title": "Learning Session",
+    "loading_text": "Generating your next learning chapter...",
+    "story_title": "Your Story Chapter",
     "quiz": {
-      "title": "Test your Knowledge",
-      "button": "Check Answer",
+      "title": "Check Your Understanding",
+      "button": "Submit Answer",
       "correct": "Correct!",
-      "incorrect": "Unfortunately, not correct."
+      "incorrect": "Not quite, let's review.",
+      "placeholder": "Type your answer here...",
+      "correct_answer_was": "The correct answer was:",
+      "next_button": "Next Question"
+    },
+    "completion": {
+      "title": "Module Complete!",
+      "subtitle": "You've successfully mastered all topics in this module.",
+      "button": "View My Progress"
     }
   },
   "progress": {
-    "title": "Your Knowledge Map",
-    "subtitle": "Track your learning progress for each knowledge component below."
+    "title": "Your Progress",
+    "title_with_topic": "Your Progress: {topic}",
+    "subtitle": "Track your mastery of each knowledge component.",
+    "no_topic": "You haven't started a learning session yet.",
+    "button_start": "Select a Topic to Begin"
   }
 }
+

@@ -1,44 +1,39 @@
 {
   "nav": {
     "start": "Start",
-    "progress": "Mijn Voortgang"
+    "progress": "Voortgang"
   },
   "home": {
-    "title": "Maak je verhaal",
-    "subtitle": "Kies een onderwerp of upload een bestand en wij maken er een interactieve leerervaring van.",
-    "tabs": {
-      "story": "Start een Verhaal",
-      "upload": "Bestand Uploaden"
-    },
-    "topics": {
-      "title": "Kies een beschikbaar onderwerp"
-    },
-    "upload": {
-      "loading": "Verhaal wordt gegenereerd...",
-      "title_selected": "Bestand geselecteerd",
-      "title_upload": "Bestand Uploaden",
-      "prompt": "Sleep je bestand hier of klik om te bladeren",
-      "supported_files": "Ondersteunde bestandstypen: .txt, .pdf, .docx"
-    }
+    "title": "Verhalend Leren",
+    "subtitle": "Een adaptief leersysteem dat complexe onderwerpen transformeert in boeiende verhalen om de cognitieve belasting te verminderen.",
+    "topic_selection_title": "Kies een onderwerp om te beginnen",
+    "reset_progress": "Alle Voortgang Resetten"
   },
   "story": {
-    "title": "Het Verhaal",
-    "loading_text": "Volgende uitdaging wordt voorbereid...",
-    "completion": {
-      "title": "Fantastisch!",
-      "subtitle": "Je hebt alle kenniscomponenten voor dit onderwerp onder de knie.",
-      "button": "Bekijk je Kenniskaart"
-    },
-    "story_title": "Het Verhaal",
+    "title": "Leersessie",
+    "loading_text": "Je volgende leerhoofdstuk wordt gegenereerd...",
+    "story_title": "Jouw Verhaalhoofdstuk",
     "quiz": {
-      "title": "Test je Kennis",
-      "button": "Controleer Antwoord",
+      "title": "Test je Begrip",
+      "button": "Antwoord Bevestigen",
       "correct": "Correct!",
-      "incorrect": "Helaas, niet correct."
+      "incorrect": "Niet helemaal, laten we het nog eens bekijken.",
+      "placeholder": "Typ hier je antwoord...",
+      "correct_answer_was": "Het juiste antwoord was:",
+      "next_button": "Volgende Vraag"
+    },
+    "completion": {
+      "title": "Module Voltooid!",
+      "subtitle": "Je hebt alle onderwerpen in deze module succesvol afgerond.",
+      "button": "Bekijk Mijn Voortgang"
     }
   },
   "progress": {
-    "title": "Jouw Kenniskaart",
-    "subtitle": "Volg hier je leervoortgang voor elk kenniscomponent."
+    "title": "Jouw Voortgang",
+    "title_with_topic": "Jouw Voortgang: {topic}",
+    "subtitle": "Volg je beheersing van elke kenniscomponent.",
+    "no_topic": "Je hebt nog geen leersessie gestart.",
+    "button_start": "Selecteer een Onderwerp om te Beginnen"
   }
 }
+

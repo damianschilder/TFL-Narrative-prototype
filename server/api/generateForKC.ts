@@ -1,41 +1,105 @@
-// /server/api/generateForKC.ts
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { domainKnowledge } from '~/data/domainModel'; // Importeren van onze KCs
+import { allKCs } from '~/data/topics';
+import type { KnowledgeComponent } from '~/data/ww2DomainModel';
+
+const getTier1Prompt = (kc: KnowledgeComponent) => `
+You are an expert history tutor creating learning content for a high school student with low knowledge of a topic.
+Your task is to generate a short, engaging narrative and a multiple-choice question based on a specific learning objective.
+The output MUST be a valid JSON object without any markdown formatting.
+
+Learning Objective: "${kc.learningObjective}"
+
+Generate the following JSON structure:
+{
+  "story": "A concise, narrative paragraph (3-5 sentences) that explains the concept.",
+  "question": "A clear multiple-choice question testing the story's main point.",
+  "options": ["An array of 4 strings with one correct answer and three plausible distractors."],
+  "correctAnswerIndex": "The zero-based index of the correct answer in the 'options' array."
+}
+`;
+
+const getTier2Prompt = (kc: KnowledgeComponent) => `
+You are an expert history tutor creating content for a student with a medium grasp of a topic who needs to practice recall.
+Your task is to generate a narrative and a simple open-ended question.
+The output MUST be a valid JSON object without any markdown formatting.
+
+Learning Objective: "${kc.learningObjective}"
+
+Generate the following JSON structure:
+{
+  "story": "A concise, narrative paragraph (3-5 sentences) that explains the concept.",
+  "question": "A clear, open-ended question that requires a short, factual recall answer (e.g., a name, date, key term).",
+  "correctAnswer": "A string with the exact expected answer."
+}
+`;
+
+const getTier3Prompt = (kc: KnowledgeComponent) => `
+You are an expert history tutor creating content for a student with high mastery who needs a challenge.
+Your task is to generate a narrative and a slightly more complex open-ended question.
+The output MUST be a valid JSON object without any markdown formatting.
+
+Learning Objective: "${kc.learningObjective}"
+
+Generate the following JSON structure:
+{
+  "story": "A concise, narrative paragraph (3-5 sentences) with added nuance.",
+  "question": "An open-ended question requiring a short phrase or sentence to answer.",
+  "correctAnswer": "A string with a model correct answer."
+}
+`;
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig();
-  const { kcId } = await readBody(event);
-
-  if (!kcId) {
-    throw createError({ statusCode: 400, statusMessage: 'Geen KC ID opgegeven.' });
-  }
-
-  const kc = domainKnowledge.find(k => k.id === kcId);
-
-  if (!kc) {
-    throw createError({ statusCode: 404, statusMessage: 'KC niet gevonden.' });
-  }
-
   const genAI = new GoogleGenerativeAI(config.gemini.apiKey);
-  const model = genAI.getGenerativeModel({ model: config.gemini.modelName });
 
-  const prompt = `Je bent een API die alleen JSON retourneert.
-Jouw taak is om een specifieke kenniscomponent (KC) te onderwijzen.
-Gebruik de volgende informatie om een kort, boeiend verhaal voor een 16-jarige te schrijven: "${kc.learningObjective}".
-Genereer daarna één multiple-choice vraag die specifiek test of de student de informatie uit de KC heeft begrepen.
-Antwoord ALLEEN met een geldig JSON-object met de keys "story", "question", "options", "correctAnswerIndex" en "kcId".
-BELANGRIJK: Zorg ervoor dat er maar één correct antwoord is en de andere drie opties plausibel maar duidelijk onjuist zijn.`;
+  const { kcId, masteryScore } = await readBody(event);
 
+  if (!kcId || masteryScore === undefined) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Missing kcId or masteryScore in the request body.',
+    });
+  }
+
+  const kc = allKCs.get(kcId);
+  if (!kc) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: `Knowledge Component with id ${kcId} not found.`,
+    });
+  }
+
+  let prompt;
+  if (masteryScore < 0.40) {
+    console.log(`[API] Tier 1 selected for KC: ${kcId} (Mastery: ${masteryScore})`);
+    prompt = getTier1Prompt(kc);
+  } else if (masteryScore >= 0.40 && masteryScore < 0.85) {
+    console.log(`[API] Tier 2 selected for KC: ${kcId} (Mastery: ${masteryScore})`);
+    prompt = getTier2Prompt(kc);
+  } else {
+    console.log(`[API] Tier 3 selected for KC: ${kcId} (Mastery: ${masteryScore})`);
+    prompt = getTier3Prompt(kc);
+  }
+  
   try {
+    const model = genAI.getGenerativeModel({
+      model: config.gemini.modelName,
+      generationConfig: {
+        responseMimeType: "application/json",
+      },
+    });
+
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    let jsonOutput = response.text().replace(/```json/g, '').replace(/```/g, '').trim();
-    
-    const generatedData = JSON.parse(jsonOutput);
-    generatedData.kcId = kcId; // Voeg de KC ID toe aan de response
-    return generatedData;
+    const jsonResponse = JSON.parse(response.text());
+
+    return { ...jsonResponse, kcId };
+
   } catch (error) {
-    console.error('Gemini API Fout (KC):', error);
-    throw createError({ statusCode: 500, statusMessage: 'Er ging iets mis bij het genereren voor de KC.' });
+    console.error('Error generating content with Gemini API:', error);
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Failed to generate learning content from the AI model.',
+    });
   }
 });

@@ -1,6 +1,8 @@
+// /server/api/stories/index.post.ts
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { allKCs } from '~/data/topics';
 import type { KnowledgeComponent } from '~/data/ww2DomainModel';
+import { generateForKCSchema } from '~/schemas';
 
 const getTier1Prompt = (kc: KnowledgeComponent) => `
 You are an expert history tutor creating learning content for a high school student with low knowledge of a topic.
@@ -52,14 +54,19 @@ export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig();
   const genAI = new GoogleGenerativeAI(config.gemini.apiKey);
 
-  const { kcId, masteryScore } = await readBody(event);
+  const body = await readBody(event);
 
-  if (!kcId || masteryScore === undefined) {
+  // Validate the request body using the Zod schema
+  const validation = generateForKCSchema.safeParse(body);
+  if (!validation.success) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Missing kcId or masteryScore in the request body.',
+      statusMessage: 'Invalid request body.',
+      data: validation.error.issues,
     });
   }
+
+  const { kcId, masteryScore } = validation.data;
 
   const kc = allKCs.get(kcId);
   if (!kc) {
@@ -71,13 +78,10 @@ export default defineEventHandler(async (event) => {
 
   let prompt;
   if (masteryScore < 0.40) {
-    console.log(`[API] Tier 1 selected for KC: ${kcId} (Mastery: ${masteryScore})`);
     prompt = getTier1Prompt(kc);
   } else if (masteryScore >= 0.40 && masteryScore < 0.85) {
-    console.log(`[API] Tier 2 selected for KC: ${kcId} (Mastery: ${masteryScore})`);
     prompt = getTier2Prompt(kc);
   } else {
-    console.log(`[API] Tier 3 selected for KC: ${kcId} (Mastery: ${masteryScore})`);
     prompt = getTier3Prompt(kc);
   }
   

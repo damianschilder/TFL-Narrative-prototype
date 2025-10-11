@@ -7,7 +7,21 @@
     "title": "Verhalend Leren",
     "subtitle": "Een adaptief leersysteem dat complexe onderwerpen transformeert in boeiende verhalen om de cognitieve belasting te verminderen.",
     "topic_selection_title": "Kies een onderwerp om te beginnen",
-    "reset_progress": "Alle Voortgang Resetten"
+    "reset_progress": "Alle Voortgang Resetten",
+    "reset_success": "Voortgang succesvol gewist!"
+  },
+  "progress": {
+    "title": "Jouw Voortgang",
+    "title_with_topic": "Jouw Voortgang: {topic}",
+    "subtitle": "Volg je beheersing van elke kenniscomponent.",
+    "no_topic": "Je hebt nog geen leersessie gestart.",
+    "button_start": "Selecteer een Onderwerp om te Beginnen",
+    "categories": {
+      "What": "Wat",
+      "How": "Hoe",
+      "So what?": "En dan?",
+      "Misconceptions": "Misvattingen"
+    }
   },
   "story": {
     "title": "Leersessie",
@@ -15,25 +29,55 @@
     "story_title": "Jouw Verhaalhoofdstuk",
     "quiz": {
       "title": "Test je Begrip",
+      "placeholder": "Typ hier je antwoord...",
       "button": "Antwoord Bevestigen",
+      "next_button": "Volgende Vraag",
       "correct": "Correct!",
       "incorrect": "Niet helemaal, laten we het nog eens bekijken.",
-      "placeholder": "Typ hier je antwoord...",
-      "correct_answer_was": "Het juiste antwoord was:",
-      "next_button": "Volgende Vraag"
+      "correct_answer_was": "Het juiste antwoord was:"
     },
     "completion": {
       "title": "Module Voltooid!",
       "subtitle": "Je hebt alle onderwerpen in deze module succesvol afgerond.",
       "button": "Bekijk Mijn Voortgang"
+    },
+    "debug": {
+      "kc_id": "KC ID:",
+      "attempts": "Pogingen:",
+      "mastery": "Beheersing:",
+      "tier": "Niveau:",
+      "gen_api": "Gen API:",
+      "val_api": "Val API:",
+      "testing_controls": "Testknoppen",
+      "regenerate": "Opnieuw",
+      "force_tier": "Forceer N{tier}",
+      "forced_tier_active": "Geforceerd Niveau Actief"
     }
   },
-  "progress": {
-    "title": "Jouw Voortgang",
-    "title_with_topic": "Jouw Voortgang: {topic}",
-    "subtitle": "Volg je beheersing van elke kenniscomponent.",
-    "no_topic": "Je hebt nog geen leersessie gestart.",
-    "button_start": "Selecteer een Onderwerp om te Beginnen"
+  "app": {
+    "desktop_only_title": "Desktop Ervaring",
+    "desktop_only_message": "Deze applicatie is momenteel geoptimaliseerd voor een desktop-ervaring. Open deze pagina op een groter scherm."
+  },
+  "topics": {
+    "ww2": {
+      "title": "Tweede Wereldoorlog",
+      "description": "Een module over de belangrijkste gebeurtenissen, figuren en concepten van de Tweede Wereldoorlog, gebaseerd op het middelbareschoolcurriculum."
+    }
+  },
+  "kcs": {
+    "kc1": { "name": "Tijdlijn WOII" },
+    "kc2": { "name": "Interbellum Condities" },
+    "kc3": { "name": "Invasie van Polen" },
+    "kc6": { "name": "Hitlers Ideologie" },
+    "kc9": { "name": "Impact van Bezetting" },
+    "kc13": { "name": "Van Isolationisme naar Allianties" },
+    "kc14": { "name": "Volgorde WOII Gebeurtenissen" },
+    "kc16": { "name": "Analyseer Propaganda" },
+    "kc17": { "name": "Val van Fascistische Regimes" },
+    "kc22": { "name": "Impact van de Holocaust" },
+    "kc25": { "name": "Naoorlogse Mensenrechten" },
+    "kc27": { "name": "Misvatting: Enige Oorzaak" },
+    "kc28": { "name": "Misvatting: Toetreding VS" },
+    "kc29": { "name": "Misvatting: Atoombommen" }
   }
 }
-

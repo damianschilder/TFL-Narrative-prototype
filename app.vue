@@ -5,9 +5,9 @@
       <span class="material-symbols-outlined text-primary text-6xl mb-4">
         laptop_chromebook
       </span>
-      <h1 class="text-3xl font-bold text-foreground mb-2">Desktop Ervaring</h1>
+      <h1 class="text-3xl font-bold text-foreground mb-2">{{ t('app.desktop_only_title') }}</h1>
       <p class="text-lg text-muted-foreground max-w-sm">
-        Deze applicatie is momenteel geoptimaliseerd voor een desktop-ervaring. Open deze pagina op een groter scherm.
+        {{ t('app.desktop_only_message') }}
       </p>
     </div>
 
@@ -20,6 +20,9 @@
 
 <script setup>
 import { useBreakpoints } from '@vueuse/core'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const breakpoints = useBreakpoints({
   desktop: 1024,

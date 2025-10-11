@@ -1,142 +1,201 @@
-Nuxt Theming, Structure, and i18n Template
+# Nuxt 3 AI-Assisted Development Guide
 
-This document outlines a robust and maintainable structure for a Nuxt 3 project using Tailwind CSS for theming and @nuxtjs/i18n for internationalization. The core philosophy is to create a "single source of truth" for all design tokens (colors, fonts, etc.) and text content to ensure consistency and scalability.
-Core Philosophy
+This document outlines a robust and maintainable structure for a Nuxt 3 project using Tailwind CSS for theming, Pinia for state management, and @nuxtjs/i18n for internationalization. The core philosophy is to create a "single source of truth" for all design tokens, text content, and data validation to ensure consistency and scalability.
 
-Our system is built on three clear principles:
+## Core Philosophy
 
-    Define Tokens: All theme variables (colors, fonts, etc.) are defined as native CSS variables in a global stylesheet (assets/css/main.css). This file is the ultimate source of truth for the project's design language.
+Our system is built on these principles:
 
-    Map Tokens: The tailwind.config.ts file reads these CSS variables and maps them to Tailwind's utility classes (e.g., bg-primary, text-foreground), making the design language available throughout the application.
+1. **Define Tokens**: All core theme variables (primarily colors) are defined as native CSS variables in a global stylesheet (`assets/css/main.css`). This file is the source of truth for the project's design language.
+    
+2. **Map Tokens**: The `tailwind.config.ts` file reads these CSS variables and maps them to Tailwind's utility classes (e.g., `bg-primary`, `text-foreground`), making the design language available throughout the application.
+    
+3. **Centralize State**: Global UI state (e.g., theme mode) is managed in a central Pinia store and accessed via a dedicated composable (`composables/useUI.ts`) for clean, decoupled access.
+    
+4. **Centralize Content**: All user-facing text is managed through locale files (e.g., `locales/en.json`). Components reference type-safe translation keys instead of hardcoding text.
+    
+5. **Centralize Validation**: All data validation rules are defined once in a central `schemas` directory using **Zod**. These schemas serve as the single source of truth for securing API endpoints on the server and providing instant user feedback in forms on the client via **`vee-validate`**.
+    
 
-    Centralize Content: All user-facing text is managed through locale files (e.g., locales/en.json). Components will reference translation keys instead of hardcoding text, allowing for easy updates and multi-language support.
+## Core Dependencies Overview
 
-This architecture allows for rapid re-theming by modifying assets/css/main.css and seamless content management via the locales directory.
-Project Structure Overview
+This project architecture assumes the installation and configuration of the following key Nuxt modules and libraries:
 
-The essential file and folder structure is as follows. Each component plays a specific role in maintaining architectural integrity.
+- **`@nuxtjs/tailwindcss`**: Integrates Tailwind CSS for utility-first styling.
+    
+- **`@pinia/nuxt`**: Provides state management capabilities with Pinia.
+    
+- **`@nuxtjs/i18n`**: Handles internationalization and locale files.
+    
+- **`@nuxtjs/google-fonts`**: Optimally loads and manages Google Fonts.
+    
+- **`nuxt-security`**: Applies critical security headers, rate limiting, and other middleware.
+    
+- **`zod`**: The single source of truth for all data validation schemas.
+    
+- **`vee-validate` & `@vee-validate/zod`**: The client-side form validation library that connects Vue components to Zod schemas.
+    
 
+## Expanded Project Structure
+
+This structure provides a clear separation of concerns, making the project intuitive to navigate and scale.
+
+```
 project-folder/
-├── assets/
-│   └── css/
-│       └── main.css          # (PURPOSE: The single source of truth for all theme variables)
-├── components/               # (PURPOSE: Reusable Vue components, auto-imported)
+├── assets/                  # (PURPOSE: Source files processed by the build tool)
+│   ├── css/                 # (PURPOSE: Global stylesheets, e.g., main.css)
+│   ├── fonts/               # (PURPOSE: Self-hosted font files, e.g., .woff2)
+│   ├── icons/               # (PURPOSE: SVG icons intended for use as components)
+│   └── images/              # (PURPOSE: UI images like logos, backgrounds, illustrations)
+├── components/
+│   ├── ui/                  # (PURPOSE: Highly reusable, stateless UI elements, e.g., BaseButton.vue)
+│   ├── shared/              # (PURPOSE: App-wide components with logic, e.g., TheNavbar.vue)
+│   └── pages/               # (PURPOSE: Components specific to a single page)
+├── composables/             # (PURPOSE: Stateful, reusable logic using Vue's Composition API)
+│   ├── auth/
+│   │   └── useAuthentication.ts
+│   └── useUI.ts
+├── data/                    # (PURPOSE: Static, typed data for the app, e.g., navigation links)
+│   └── navigation.ts
 ├── layouts/
-│   └── default.vue         # (PURPOSE: The master page layout for consistent structure)
 ├── locales/
-│   ├── en.json             # (PURPOSE: English translations, the default)
-│   └── nl.json             # (PURPOSE: Dutch translations)
 ├── pages/
-│   └── ...                 # (PURPOSE: The individual views of the application)
-├── nuxt.config.ts            # (PURPOSE: Wires all modules, styles, and i18n together)
-├── package.json              # (PURPOSE: Manages project dependencies)
-└── tailwind.config.ts        # (PURPOSE: Maps theme variables to Tailwind utility classes)
+├── public/                  # (PURPOSE: Unprocessed files with static URLs)
+│   ├── documents/           # (PURPOSE: Downloadable PDFs, reports, etc.)
+│   └── robots.txt
+├── schemas/                 # (PURPOSE: Zod schemas - the single source of truth for data validation)
+│   ├── index.ts
+│   ├── authSchemas.ts
+│   └── storySchemas.ts
+├── server/
+│   └── api/
+├── stores/
+├── utils/                   # (PURPOSE: Stateless, pure helper functions)
+│   └── formatters.ts
+├── .env
+├── nuxt.config.ts
+├── package.json
+└── tailwind.config.ts
+```
 
-Description of Key Files
+## Directory Deep Dive 🧐
 
-The following sections describe the purpose of each key file and provide a structural example.
-1. assets/css/main.css
+Understanding the role of each directory is key to maintaining architectural integrity.
 
-Purpose: This is the most important file for theming. It defines all the color variables using :root and includes the base Tailwind directives. To change a color sitewide, you only need to edit the variables in this file.
+### **`assets` vs. `public`**
 
-Example Content:
+- **`assets`**: Use this for files you reference in your components and styles. They are part of your application's source code and will be processed, optimized, and hashed by the build tool (Vite). **Use for**: CSS, fonts, UI images, and icons that need optimization.
+    
+- **`public`**: Use this for files that must have a fixed name and URL and should not be processed. They are copied directly to the output directory. **Use for**: `robots.txt`, `favicon.ico`, social share images, and downloadable documents like PDFs.
+    
 
-/* /assets/css/main.css */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+### **`composables` vs. `utils`**
 
-:root {
-  --background: 222 84% 4.9%;
-  --foreground: 210 40% 98%;
-  --primary: 217.2 91.2% 59.8%;
-  --primary-foreground: 222.2 47.4% 11.2%;
-  /* ... and so on for all other theme variables */
-}
+This distinction is crucial for separating stateful logic from pure functions.
 
-body {
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
-  font-family: 'Inter', sans-serif;
-}
+- **`composables`**: These are for **stateful**, reusable logic. A function belongs here if it uses Vue's Composition API (`ref`, `computed`, etc.) or interacts with a Pinia store. The file names are typically prefixed with `use` (e.g., `useAuthentication.ts`).
+    
+- **`utils`**: These are for **stateless**, pure helper functions. A function belongs here if it takes an input, produces an output, and has no side effects or reactivity. **Examples**: formatting dates, calculating values, or simple data transformations.
+    
 
-2. tailwind.config.ts
+### **`data`**
 
-Purpose: This file configures Tailwind to understand our custom theme. It extends the default theme, creating new utility classes (e.g., bg-primary) based on the CSS variables defined in main.css.
+This directory is the source of truth for semi-static, structured content that isn't managed by a CMS or API but is used throughout the application. By defining data here (e.g., in `.ts` files), you get full type safety. **Examples**: main navigation links, footer content, or options for a `<select>` dropdown.
 
-Example Content:
+### **`schemas`**
 
-// /tailwind.config.ts
-import type { Config } from 'tailwindcss'
+This directory is the absolute source of truth for your data contracts. It contains all **Zod** schemas, which define the shape and validation rules for every piece of data your application handles, from form inputs to API responses.
 
-export default <Partial<Config>>{
-  content: [ /* paths to all template files */ ],
-  theme: {
-    extend: {
-      colors: {
-        background: 'hsl(var(--background))',
-        foreground: 'hsl(var(--foreground))',
-        primary: {
-          DEFAULT: 'hsl(var(--primary))',
-          foreground: 'hsl(var(--primary-foreground))',
-        },
-        /* ... and so on for all other theme colors */
-      },
-    },
-  },
-  plugins: [],
-}
+## Naming & API Conventions
 
-3. locales/en.json
+### **1. Naming Conventions**
 
-Purpose: This file contains the key-value pairs for all English text in the application. It serves as the default language. All text within components should use keys from this file via the $t() function.
+- **Components (`PascalCase`)**: `components/ui/BaseButton.vue`, `components/shared/TheNavbar.vue`.
+    
+- **TS/JS Files (`camelCase`)**: `composables/useAuthentication.ts`, `stores/userProfile.ts`, `schemas/authSchemas.ts`.
+    
+- **i18n Keys (`dot.notation`)**: `pages.login.form.submitButton`.
+    
 
-Example Content:
+### **2. Server API Structure**
 
-/* /locales/en.json */
-{
-  "welcome": {
-    "title": "Welcome to our Application",
-    "subtitle": "We are glad to have you here."
-  },
-  "buttons": {
-    "submit": "Submit",
-    "cancel": "Cancel"
-  }
-}
+Adopt a **feature-based** API structure by grouping endpoints into directories named after the **resource** they manage.
 
-4. nuxt.config.ts & layouts/default.vue
+```
+server/
+└── api/
+    ├── stories/
+    │   ├── index.get.ts         # (Handles GET /api/stories)
+    │   ├── index.post.ts        # (Handles POST /api/stories)
+    │   └── [id].get.ts          # (Handles GET /api/stories/:id)
+    └── users/
+        └── [id]/
+            └── profile.get.ts   # (Handles GET /api/users/:id/profile)
+```
 
-Purpose: These files handle the project's setup and structure. nuxt.config.ts registers all modules, loads the global stylesheet, and configures the i18n options. layouts/default.vue provides a consistent wrapper for all pages.
-Instructions for AI Assistants (e.g., Gemini)
+## Instructions for AI Assistants
 
-Your Role: You are an AI assistant tasked with creating new Vue components and pages for a Nuxt project that uses a strict, token-based theming and internationalization system.
+**Your Role**: You are an AI assistant creating new components, pages, and API endpoints that strictly adhere to this architecture.
 
-Context: You will be provided with this manifest file AND the actual set of configuration files for a specific project. Your primary objective is to create new components that strictly adhere to the rules defined in those provided files. Assume English is the default language, and until specified otherwise, you are only interested in the en.json file for text content.
+**Core Directive**: **DO NOT INVENT STYLES, HARDCODE TEXT, OR WRITE CUSTOM VALIDATION.** Translate all visual properties, text, and data validation rules into the project's existing "single source of truth" systems.
 
-Core Directive: DO NOT INVENT STYLES OR HARDCODE TEXT. When given UX/UI inspiration, your task is to translate its visual properties and text into the project's existing theme and locale files. You must use the pre-defined utility classes and i18n keys.
-Workflow:
+### Workflow
 
-    Analyze the Theme & Locales First: Before coding, review the provided assets/css/main.css, tailwind.config.ts, and locales/en.json files to understand the available theme classes (e.g., bg-primary, text-muted-foreground) and existing translation keys. This is your design and content language.
+1. **Analyze the System First**: Review `assets/css/main.css`, `tailwind.config.ts`, `locales/en.json`, and the `schemas/` directory.
+    
+2. **Deconstruct the Inspiration**: Analyze stylistic properties, user-facing text, and form inputs.
+    
+3. **Translate to Theme & i18n Keys**:
+    
+    - Map styles to Tailwind utility classes (e.g., a blue background becomes `bg-primary`).
+        
+    - For every piece of text, create a logical, nested i18n key (e.g., `user.profile.title`) and use the `t()` function.
+        
+4. **Content & Tone Guidelines**:
+    
+    - **Use Sentence Case**: All user-facing text **must** use sentence case.
+        
+        - **Correct**: `pages.home.title: "Create a new story"`
+            
+        - **Incorrect**: `pages.home.title: "Create a New Story"`
+            
+    - **Be Specific and Factual with Status Messages**: Avoid generic text. The text must professionally and accurately describe the system action.
+        
+        - **Good Example**: For a process that validates input and calls an AI model, use keys like:
+            
+            - `status.validatingInput: "Validating input..."`
+                
+            - `status.queryingModel: "Querying the AI model..."`
+                
+            - `status.processingResponse: "Processing response..."`
+                
+5. **Define or Use Validation Schema**:
+    
+    - For any new data, you **must** use or create a Zod schema from the `schemas/` directory.
+        
+    - **Server-Side**: Use the schema to validate the request body in API routes.
+        
+    - **Client-Side**: Import the _same schema_ and use it with `vee-validate` in forms.
+        
+6. **Update `en.json`**: Add any new i18n keys to `locales/en.json`.
+    
+7. **Construct the Component/API**: Build the final code using only the translated utility classes, i18n keys, and Zod schemas. Do not write custom CSS in a `<style>` block unless absolutely necessary.
+    
+8. **Format Your Output**: You **must** start every code block with a comment indicating the full path and filename.
+    
+    - For `.vue`, `.ts`, `.js`, `.json` files: `// /path/to/your/file.vue`
+        
+    - For `.css` files: `/* /path/to/your/file.css */`
+        
+9. **Avoid Code Comments**: Do not add comments inside the code that explain what it does. The file path at the top is the only required comment.
+    
 
-    Deconstruct the Inspiration: Look at the stylistic properties (e.g., background-color: #4A90E2, font-weight: 700) and all user-facing text (e.g., "Sign Up Now").
+## Advanced Project Configuration
 
-    Translate to Theme Classes & i18n Keys:
+### Validation: Zod + vee-validate (Single Source of Truth)
 
-        Map stylistic properties to the corresponding utility classes from the project's theme. A blue background becomes bg-primary, bold font weight becomes font-bold, etc.
+All data validation is centralized in the `schemas/` directory. This creates a perfectly synchronized, DRY (Don't Repeat Yourself) system where a change to a schema is instantly reflected on both the client (for instant UX feedback) and the server (for security).
 
-        For every piece of text, create a logical, nested key (e.g., user.profile.title) and use the $t('user.profile.title') function in the template.
+### API & Server Security (`nuxt-security`)
 
-    Update en.json: Add any new keys you created to the locales/en.json file with the correct English translation.
-
-    Construct the Component: Build the final Vue component using only the translated utility classes and i18n keys. Do not write custom CSS in a <style> block unless absolutely necessary for a unique, non-reusable effect.
-
-    Component Usage: Nuxt 3 auto-imports components. A component at components/shared/navbar.vue should be referenced as <SharedNavbar />.
-
-    Format Your Output: When you provide code, you must start the code block with a comment indicating the full path and filename. This is crucial for organization.
-
-        For .vue, .ts, .js, .json files: // /path/to/your/file.vue
-
-        For .css files: /* /path/to/your/file.css */
-
-    Avoid Code Comments: Do not add comments inside the code that explain what the code does. The code should be self-explanatory. The only required comment is the file path at the very beginning.
+While Zod validates data _content_, `nuxt-security` handles the _transport layer_. It is configured in `nuxt.config.ts` to automatically provide rate limiting, secure headers (CSP), request size limits, and CORS handling.

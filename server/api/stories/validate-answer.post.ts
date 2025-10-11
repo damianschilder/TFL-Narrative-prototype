@@ -1,17 +1,24 @@
+// /server/api/stories/validate-answer.post.ts
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { validateAnswerSchema } from '~/schemas';
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig();
   const genAI = new GoogleGenerativeAI(config.gemini.apiKey);
 
-  const { userAnswer, question, modelAnswer } = await readBody(event);
+  const body = await readBody(event);
 
-  if (!userAnswer || !question || !modelAnswer) {
+  // Validate the request body using the Zod schema
+  const validation = validateAnswerSchema.safeParse(body);
+  if (!validation.success) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Missing userAnswer, question, or modelAnswer in the request body.',
+      statusMessage: 'Invalid request body.',
+      data: validation.error.issues,
     });
   }
+
+  const { userAnswer, question, modelAnswer } = validation.data;
 
   const prompt = `
 You are an AI assistant evaluating a student's answer to a history question.
@@ -48,4 +55,3 @@ Return {"isCorrect": true} if the student's answer is correct, and {"isCorrect":
     });
   }
 });
-

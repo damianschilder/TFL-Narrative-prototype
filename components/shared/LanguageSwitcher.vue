@@ -1,25 +1,25 @@
-// /components/LanguageSwitcher.vue
+// /components/shared/LanguageSwitcher.vue
 <template>
-  <div class="flex items-center gap-2">
-    <span class="material-symbols-outlined text-muted-foreground">
-      language
-    </span>
+  <div class="flex items-center">
     <NuxtLink
       v-for="locale in availableLocales"
       :key="locale.code"
       :to="switchLocalePath(locale.code)"
-      class="font-semibold text-muted-foreground hover:text-primary transition-colors"
+      class="px-2 py-1 text-sm font-bold uppercase"
+      :class="[
+        locale.code === currentLocale ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+      ]"
     >
-      {{ locale.code.toUpperCase() }}
+      {{ locale.code }}
     </NuxtLink>
   </div>
 </template>
 
 <script setup>
-const { locale, locales } = useI18n()
+import { useI18n, useSwitchLocalePath } from '#imports'
+
+const { locale: currentLocale, locales } = useI18n()
 const switchLocalePath = useSwitchLocalePath()
 
-const availableLocales = computed(() => {
-  return locales.value.filter(i => i.code !== locale.value)
-})
+const availableLocales = locales.value.filter(i => i.code !== currentLocale.value)
 </script>

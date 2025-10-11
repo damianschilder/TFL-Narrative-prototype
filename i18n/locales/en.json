@@ -7,7 +7,21 @@
     "title": "Narrative Learning",
     "subtitle": "An adaptive learning system that transforms complex topics into engaging narratives to reduce cognitive load.",
     "topic_selection_title": "Choose a Topic to Begin",
-    "reset_progress": "Reset All Progress"
+    "reset_progress": "Reset All Progress",
+    "reset_success": "Progress successfully reset!"
+  },
+  "progress": {
+    "title": "Your Progress",
+    "title_with_topic": "Your Progress: {topic}",
+    "subtitle": "Track your mastery of each knowledge component.",
+    "no_topic": "You haven't started a learning session yet.",
+    "button_start": "Select a Topic to Begin",
+    "categories": {
+      "What": "What",
+      "How": "How",
+      "So what?": "So what?",
+      "Misconceptions": "Misconceptions"
+    }
   },
   "story": {
     "title": "Learning Session",
@@ -15,25 +29,55 @@
     "story_title": "Your Story Chapter",
     "quiz": {
       "title": "Check Your Understanding",
+      "placeholder": "Type your answer here...",
       "button": "Submit Answer",
+      "next_button": "Next Question",
       "correct": "Correct!",
       "incorrect": "Not quite, let's review.",
-      "placeholder": "Type your answer here...",
-      "correct_answer_was": "The correct answer was:",
-      "next_button": "Next Question"
+      "correct_answer_was": "The correct answer was:"
     },
     "completion": {
       "title": "Module Complete!",
       "subtitle": "You've successfully mastered all topics in this module.",
       "button": "View My Progress"
+    },
+    "debug": {
+      "kc_id": "KC ID:",
+      "attempts": "Attempts:",
+      "mastery": "Mastery:",
+      "tier": "Tier:",
+      "gen_api": "Gen API:",
+      "val_api": "Val API:",
+      "testing_controls": "Testing Controls",
+      "regenerate": "Regenerate",
+      "force_tier": "Force T{tier}",
+      "forced_tier_active": "Forced Tier Active"
     }
   },
-  "progress": {
-    "title": "Your Progress",
-    "title_with_topic": "Your Progress: {topic}",
-    "subtitle": "Track your mastery of each knowledge component.",
-    "no_topic": "You haven't started a learning session yet.",
-    "button_start": "Select a Topic to Begin"
+  "app": {
+    "desktop_only_title": "Desktop Experience",
+    "desktop_only_message": "This application is currently optimized for a desktop experience. Please open this page on a larger screen."
+  },
+  "topics": {
+    "ww2": {
+      "title": "World War II",
+      "description": "A module covering the key events, figures, and concepts of the Second World War, based on the high school curriculum."
+    }
+  },
+  "kcs": {
+    "kc1": { "name": "WWII Timeline" },
+    "kc2": { "name": "Interwar Conditions" },
+    "kc3": { "name": "Invasion of Poland" },
+    "kc6": { "name": "Hitler's Ideology" },
+    "kc9": { "name": "Occupation Impact" },
+    "kc13": { "name": "Isolationism to Alliances" },
+    "kc14": { "name": "Sequence WWII Events" },
+    "kc16": { "name": "Analyze Propaganda" },
+    "kc17": { "name": "Fascist Regime Collapse" },
+    "kc22": { "name": "Holocaust's Impact" },
+    "kc25": { "name": "Postwar Human Rights" },
+    "kc27": { "name": "Misconception: Sole Cause" },
+    "kc28": { "name": "Misconception: US Entry" },
+    "kc29": { "name": "Misconception: Atomic Bombings" }
   }
 }
-

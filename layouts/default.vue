@@ -12,3 +12,23 @@
 
     </div>
 </template>
+
+<script setup>
+import { useUIStore } from '~/stores/ui'
+import { useColorMode } from '@vueuse/core'
+import { watch } from 'vue'
+
+const uiStore = useUIStore()
+const mode = useColorMode({
+  selector: 'html',
+  attribute: 'class',
+  modes: {
+    light: 'light',
+    dark: 'dark',
+  },
+})
+
+watch(() => uiStore.theme, (newTheme) => {
+  mode.value = newTheme
+}, { immediate: true })
+</script>

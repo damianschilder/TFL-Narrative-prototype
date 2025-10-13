@@ -1,28 +1,33 @@
-// /utils/studentModel.ts
-import { topics, type Topic } from '~/data/topics';
-import type { KnowledgeComponent } from '~/data/ww2DomainModel';
+import { tijdvakken } from '~/data';
+import type { KnowledgeComponent, KenmerkendAspect } from '~/types/domain';
 
 // Interface for the state of a single KC
 export interface StudentKCState {
-  mastery: number; // Probability that the student knows this (0.0 to 1.0)
+  mastery: number;
   attempts: number;
 }
 
-// BKT Parameters
-const P_INIT = 0.25;      // Initial probability of knowing the concept
-const P_TRANSIT = 0.15;   // Probability of learning after an attempt
-const P_GUESS = 0.20;     // Probability of guessing correctly
-const P_SLIP = 0.10;      // Probability of making a mistake despite knowing
+// BKT Parameters (gelijk gebleven)
+const P_INIT = 0.25;
+const P_TRANSIT = 0.15;
+const P_GUESS = 0.20;
+const P_SLIP = 0.10;
+const MASTERY_THRESHOLD = 0.95;
 
-const MASTERY_THRESHOLD = 0.95; // Threshold to consider a KC as mastered
+// --- State Management ---
 
-// --- Topic and State Management ---
-
-const getActiveTopic = (): Topic | null => {
+// Vind het actieve Kenmerkend Aspect op basis van de key in sessionStorage
+const getActiveKenmerkendAspect = (): KenmerkendAspect | null => {
   if (typeof window === 'undefined') return null;
-  const activeTopicKey = sessionStorage.getItem('activeTopicKey');
-  if (!activeTopicKey) return null;
-  return topics.find(t => t.key === activeTopicKey) || null;
+  const activeAspectKey = sessionStorage.getItem('activeAspectKey');
+  if (!activeAspectKey) return null;
+
+  // Doorzoek de tijdvakken om het juiste aspect te vinden
+  for (const tijdvak of tijdvakken) {
+    const aspect = tijdvak.aspecten.find(a => a.id === activeAspectKey);
+    if (aspect) return aspect;
+  }
+  return null;
 };
 
 export const getStudentState = (): { [kcId: string]: StudentKCState } | null => {
@@ -35,41 +40,38 @@ const saveStudentState = (state: { [kcId: string]: StudentKCState }): void => {
   sessionStorage.setItem('studentState', JSON.stringify(state));
 };
 
-export const initializeStudentState = (topicKey: string): void => {
-  const topic = topics.find(t => t.key === topicKey);
-  if (!topic) {
-    console.error('[studentModel] Topic not found for key:', topicKey);
+// Initialiseer de state voor een specifiek Kenmerkend Aspect
+export const initializeStudentState = (aspectKey: string): void => {
+  const aspect = tijdvakken.flatMap(t => t.aspecten).find(a => a.id === aspectKey);
+  
+  if (!aspect || !aspect.knowledgeComponents) {
+    console.error('[studentModel] Kenmerkend Aspect of KCs niet gevonden voor key:', aspectKey);
     return;
   }
   
-  sessionStorage.setItem('activeTopicKey', topicKey);
+  sessionStorage.setItem('activeAspectKey', aspectKey);
 
   const initialState: { [kcId: string]: StudentKCState } = {};
-  for (const kc of topic.domainKnowledge) {
+  for (const kc of aspect.knowledgeComponents) {
     initialState[kc.id] = { mastery: P_INIT, attempts: 0 };
   }
-  // --- ADDED LOG ---
-  console.log('[studentModel] Initialized student state for topic:', topicKey, initialState);
+  
+  console.log('[studentModel] Initialized student state for aspect:', aspectKey, initialState);
   saveStudentState(initialState);
 };
 
-// --- BKT Logic ---
-
+// --- BKT Logic (deze functie is ongewijzigd) ---
 export function updateKCMastery(kcId: string, isCorrect: boolean): void {
   const state = getStudentState();
   if (!state || !state[kcId]) {
     console.error('[studentModel] Could not find state to update for KC:', kcId);
     return;
   }
-
   const kcState = state[kcId];
-  // --- ADDED LOG ---
   console.log(`[studentModel] Updating KC: ${kcId}. Correct: ${isCorrect}. Current mastery: ${kcState.mastery}`);
   kcState.attempts += 1;
-  
   const pKnown = kcState.mastery;
   let pNewKnown;
-
   if (isCorrect) {
     const pCorrectGivenKnown = 1 - P_SLIP;
     const pCorrectGivenUnknown = P_GUESS;
@@ -79,52 +81,39 @@ export function updateKCMastery(kcId: string, isCorrect: boolean): void {
     const pIncorrectGivenUnknown = 1 - P_GUESS;
     pNewKnown = (pIncorrectGivenKnown * pKnown) / ((pIncorrectGivenKnown * pKnown) + (pIncorrectGivenUnknown * (1 - pKnown)));
   }
-  
   kcState.mastery = pNewKnown + (1 - pNewKnown) * P_TRANSIT;
-  // --- ADDED LOG ---
-  console.log(`[studentModel] BKT calculation complete. P(Known) after evidence: ${pNewKnown}. New mastery after transit: ${kcState.mastery}`);
+  console.log(`[studentModel] BKT calculation complete. New mastery: ${kcState.mastery}`);
   saveStudentState(state);
-  // --- ADDED LOG ---
-  console.log('[studentModel] New student state saved.');
 }
 
+
+// Selecteer de volgende KC om te leren
 export function selectNextKC(): KnowledgeComponent | null {
-  const topic = getActiveTopic();
+  const aspect = getActiveKenmerkendAspect();
   const state = getStudentState();
 
-  // --- ADDED LOG ---
   console.log('[studentModel] Selecting next KC...');
 
-  if (!topic || !state) {
-    console.warn('[studentModel] No active topic or student state found.');
+  if (!aspect || !state || !aspect.knowledgeComponents) {
+    console.warn('[studentModel] No active aspect, student state, or KCs found.');
     return null;
   }
 
-  // --- ADDED LOG ---
-  console.log('[studentModel] Current student state:', state);
-
-  for (const kc of topic.domainKnowledge) {
+  for (const kc of aspect.knowledgeComponents) {
     const kcState = state[kc.id];
     if (kcState && kcState.mastery < MASTERY_THRESHOLD) {
-      // --- ADDED LOG ---
-      console.log(`[studentModel] Checking candidate KC: ${kc.id} (Mastery: ${kcState.mastery})`);
       const dependenciesMet = !kc.dependsOn || kc.dependsOn.every(depId => {
         const depState = state[depId];
-        const isMet = depState && depState.mastery >= MASTERY_THRESHOLD;
-        // --- ADDED LOG ---
-        console.log(`[studentModel]   - Checking dependency ${depId}: Mastery=${depState?.mastery}, Met=${isMet}`);
-        return isMet;
+        return depState && depState.mastery >= MASTERY_THRESHOLD;
       });
 
       if (dependenciesMet) {
-        // --- ADDED LOG ---
-        console.log(`[studentModel] Found next KC to learn: ${kc.id}. Dependencies met.`);
-        return kc; // This is the next KC to learn
+        console.log(`[studentModel] Found next KC to learn: ${kc.id}.`);
+        return kc;
       }
     }
   }
-  
-  // --- ADDED LOG ---
+
   console.log('[studentModel] No suitable KC found. All KCs may be mastered.');
-  return null; // All KCs for this topic are learned
+  return null;
 }

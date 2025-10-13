@@ -1,21 +1,35 @@
 {
-  "nav": {
-    "start": "Start",
-    "progress": "Progress"
+  "app": {
+    "desktop_only_title": "Desktop experience",
+    "desktop_only_message": "This application is currently optimized for a desktop experience. Please open this page on a larger screen."
+  },
+  "errors": {
+    "loginFailed": "Login attempt failed. Please check your credentials.",
+    "incorrectPassword": "The password you entered is incorrect."
   },
   "home": {
-    "title": "Narrative Learning",
+    "title": "Narrative learning",
     "subtitle": "An adaptive learning system that transforms complex topics into engaging narratives to reduce cognitive load.",
-    "topic_selection_title": "Choose a Topic to Begin",
-    "reset_progress": "Reset All Progress",
+    "tijdvak_selection_title": "1. Choose a Historical Period",
+    "aspect_selection_title": "2. Choose a Characteristic Aspect",
+    "aspects_available": "{available} of {total} aspects available",
+    "start_learning": "Start Learning",
+    "coming_soon": "Coming Soon",
+    "reset_progress": "Reset all progress",
     "reset_success": "Progress successfully reset!"
   },
-  "progress": {
-    "title": "Your Progress",
-    "title_with_topic": "Your Progress: {topic}",
-    "subtitle": "Track your mastery of each knowledge component.",
-    "no_topic": "You haven't started a learning session yet.",
-    "button_start": "Select a Topic to Begin",
+  "status": {
+    "loading": "Loading...",
+    "loadingApp": "Loading application..."
+  },
+  "kcs": {
+    "prop-kc1": { "name": "Defining Propaganda" },
+    "prop-kc2": { "name": "Communication Tools" },
+    "prop-kc3": { "name": "Mass Organizations" },
+    "prop-kc4": { "name": "Analyzing Propaganda Posters" },
+    "prop-kc5": { "name": "The Role of Radio" },
+    "prop-kc6": { "name": "Impact on the Population" },
+    "prop-kc7": { "name": "Misconception: Propaganda as Lies" },
     "categories": {
       "What": "What",
       "How": "How",
@@ -23,23 +37,87 @@
       "Misconceptions": "Misconceptions"
     }
   },
+  "nav": {
+    "start": "Start",
+    "progress": "Progress",
+    "logout": "Log out and clear session"
+  },
+  "pages": {
+    "login": {
+      "title": "Access required",
+      "subtitle": "Please enter the password to continue.",
+      "form": {
+        "passwordLabel": "Password",
+        "passwordPlaceholder": "Password",
+        "submitButton": "Unlock",
+        "submitButtonLoading": "Verifying..."
+      }
+    }
+  },
+  "progress": {
+    "title": "Your Progress",
+    "title_with_topic": "Your Progress: {topic}",
+    "subtitle": "Track your mastery of each knowledge component.",
+    "selection_subtitle": "Select a topic to view your progress.",
+    "select_other_topic": "Select another topic",
+    "no_progress_title": "No Progress Yet",
+    "no_progress_subtitle": "Start a learning session to see your progress here.",
+    "kpi": {
+        "average_mastery": "Avg. Mastery",
+        "current_level": "Level",
+        "total_attempts": "Attempts",
+        "completed_kcs": "Completed"
+    },
+    "chart": {
+        "title": "Mastery Overview per Component"
+    },
+    "history_chart": {
+        "title": "Mastery Over Time",
+        "no_data": "No progress history recorded yet. Answer some questions to see your progress."
+    },
+    "grid": {
+        "mastery": "Mastery",
+        "attempts": "Attempts"
+    },
+    "levels": {
+        "beginner": "Beginner",
+        "intermediate": "Intermediate",
+        "advanced": "Advanced",
+        "expert": "Expert",
+        "mastered": "Mastered",
+        "practicing": "Practicing",
+        "needs_review": "Needs Review"
+    }
+  },
   "story": {
-    "title": "Learning Session",
+    "title": "Learning session",
     "loading_text": "Generating your next learning chapter...",
-    "story_title": "Your Story Chapter",
+    "story_title": "Your story chapter",
+    "all_learned_title": "Module Complete!",
+    "all_learned_message": "You have successfully completed all knowledge components for this topic. Well done!",
+    "back_to_selection": "Back to Topic Selection",
+    "view_progress": "View My Progress",
     "quiz": {
-      "title": "Check Your Understanding",
+      "title": "Check your understanding",
       "placeholder": "Type your answer here...",
-      "button": "Submit Answer",
-      "next_button": "Next Question",
+      "button": "Submit answer",
+      "retry_button": "Try Again",
+      "hint_title": "Here's a hint:",
+      "next_button": "Next question",
       "correct": "Correct!",
       "incorrect": "Not quite, let's review.",
       "correct_answer_was": "The correct answer was:"
     },
     "completion": {
-      "title": "Module Complete!",
+      "title": "Module complete!",
       "subtitle": "You've successfully mastered all topics in this module.",
-      "button": "View My Progress"
+      "button": "View my progress"
+    },
+    "continuation": {
+      "title": "Great Progress!",
+      "message": "You have a good grasp of this topic. Would you like to continue practicing or choose a new topic?",
+      "continue_button": "Continue with this topic",
+      "switch_button": "Choose a new topic"
     },
     "debug": {
       "kc_id": "KC ID:",
@@ -48,36 +126,23 @@
       "tier": "Tier:",
       "gen_api": "Gen API:",
       "val_api": "Val API:",
-      "testing_controls": "Testing Controls",
+      "testing_controls": "Testing controls",
       "regenerate": "Regenerate",
       "force_tier": "Force T{tier}",
-      "forced_tier_active": "Forced Tier Active"
+      "forced_tier_active": "Forced tier active"
     }
   },
-  "app": {
-    "desktop_only_title": "Desktop Experience",
-    "desktop_only_message": "This application is currently optimized for a desktop experience. Please open this page on a larger screen."
-  },
-  "topics": {
-    "ww2": {
-      "title": "World War II",
-      "description": "A module covering the key events, figures, and concepts of the Second World War, based on the high school curriculum."
+  "kenmerkende_aspecten": {
+    "ka-propaganda": {
+      "title": "The Role of Modern Propaganda and Mass Organization",
+      "description": "A module exploring the use of modern communication tools and mass organizations to influence public opinion during the World Wars era."
     }
   },
-  "kcs": {
-    "kc1": { "name": "WWII Timeline" },
-    "kc2": { "name": "Interwar Conditions" },
-    "kc3": { "name": "Invasion of Poland" },
-    "kc6": { "name": "Hitler's Ideology" },
-    "kc9": { "name": "Occupation Impact" },
-    "kc13": { "name": "Isolationism to Alliances" },
-    "kc14": { "name": "Sequence WWII Events" },
-    "kc16": { "name": "Analyze Propaganda" },
-    "kc17": { "name": "Fascist Regime Collapse" },
-    "kc22": { "name": "Holocaust's Impact" },
-    "kc25": { "name": "Postwar Human Rights" },
-    "kc27": { "name": "Misconception: Sole Cause" },
-    "kc28": { "name": "Misconception: US Entry" },
-    "kc29": { "name": "Misconception: Atomic Bombings" }
+  "tijdvakken": {
+    "tijdvak-9": {
+      "title": "Time of World Wars",
+      "period": "1900 - 1950"
+    }
   }
 }
+

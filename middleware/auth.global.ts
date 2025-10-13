@@ -1,37 +1,29 @@
 // /middleware/auth.global.ts
-import { useAuthStore } from '~/stores/auth'
+import { logger } from '~/utils/logger'
+import { useAuthInitialized } from '~/composables/useAuthInitialized'
 
-export default defineNuxtRouteMiddleware(async (to, from) => {
-  // This middleware runs on every route change
-  const authStore = useAuthStore()
+export default defineNuxtRouteMiddleware(async (to) => {
+  const source = 'Middleware: auth.global'
+  const isInitialized = useAuthInitialized()
+  const { loggedIn, fetch: refreshSession } = useUserSession()
 
-  // We don't need to do anything on the server side here
-  if (process.server) return
-
-  // If the user's auth state is not yet set, check the session status
-  if (!authStore.isAuthenticated) {
-    try {
-      // Use $fetch to check the session with the server.
-      // This will either succeed or throw a 401 error.
-      await $fetch('/api/user', {
-         // This is a placeholder route handled by nuxt-security to check session
-        headers: {
-          'Accept': 'application/json'
-        }
-      })
-      authStore.login()
-    } catch (e) {
-      authStore.logout()
-    }
+  // On the initial client-side load, refresh the session to get the latest auth state.
+  if (process.client && !isInitialized.value) {
+    logger.info(source, 'Initializing session state...')
+    await refreshSession()
+    isInitialized.value = true
+    logger.info(source, `Initialization complete. User is ${loggedIn.value ? 'logged in' : 'not logged in'}.`)
   }
 
-  // If the user is not authenticated and not on the login page, redirect them
-  if (!authStore.isAuthenticated && to.path !== '/login') {
-    return navigateTo('/login')
-  }
-
-  // If the user IS authenticated and tries to visit the login page, redirect them away
-  if (authStore.isAuthenticated && to.path === '/login') {
+  // If the user is authenticated and trying to access the login page, redirect to home.
+  if (loggedIn.value && to.path === '/login') {
+    logger.info(source, 'Authenticated user redirected from /login to /.')
     return navigateTo('/')
+  }
+
+  // If the user is not authenticated and trying to access a protected page, redirect to login.
+  if (!loggedIn.value && to.path !== '/login') {
+    logger.info(source, `Unauthenticated user redirected to /login from '${to.path}'.`)
+    return navigateTo('/login')
   }
 })

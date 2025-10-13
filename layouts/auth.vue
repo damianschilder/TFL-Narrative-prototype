@@ -2,5 +2,6 @@
 <template>
   <div>
     <slot />
+    <SharedDebugInfo />
   </div>
 </template>

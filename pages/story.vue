@@ -1,22 +1,31 @@
-// /pages/story.vue
 <template>
   <main class="flex-grow flex items-center justify-center w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div v-if="isLoading" class="text-center">
-      <svg class="animate-spin h-8 w-8 text-primary mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-      </svg>
-      <p class="mt-4 text-lg text-muted-foreground">{{ t('story.loading_text') }}</p>
+    <!-- Loading State -->
+    <div v-if="isLoading" class="text-center flex flex-col items-center gap-4">
+      <div 
+        class="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent"
+        role="status"
+      >
+        <span class="sr-only">{{ t('status.loading') }}</span>
+      </div>
+      <p class="text-lg text-muted-foreground">{{ t('story.loading_text') }}</p>
     </div>
 
-    <div v-else-if="allLearned" class="text-center bg-card/50 border border-border/30 rounded-xl p-12 backdrop-blur-xl">
-      <h2 class="text-4xl font-black text-success mb-4">{{ t('story.completion.title') }}</h2>
-      <p class="text-xl text-foreground/80 mb-8">{{ t('story.completion.subtitle') }}</p>
-      <NuxtLinkLocale to="/progress" class="bg-primary text-primary-foreground font-bold py-3 px-8 rounded-lg text-lg transition-all transform hover:scale-105">
-        {{ t('story.completion.button') }}
-      </NuxtLinkLocale>
+    <!-- All Learned State -->
+    <div v-else-if="allLearned" class="text-center card-glass p-12">
+      <h2 class="text-3xl font-bold text-foreground">{{ t('story.all_learned_title') }}</h2>
+      <p class="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">{{ t('story.all_learned_message') }}</p>
+      <div class="mt-8 flex justify-center gap-4">
+        <NuxtLink :to="localePath('/')" class="px-6 py-3 bg-primary text-primary-foreground font-bold rounded-lg shadow-md hover:bg-primary/90 transition-colors">
+          {{ t('story.back_to_selection') }}
+        </NuxtLink>
+        <NuxtLink :to="localePath('/progress')" class="px-6 py-3 bg-secondary text-secondary-foreground font-bold rounded-lg hover:bg-secondary/80 transition-colors">
+          {{ t('story.view_progress') }}
+        </NuxtLink>
+      </div>
     </div>
     
+    <!-- Main Content -->
     <div v-else-if="storyData" class="grid grid-cols-1 lg:grid-cols-10 gap-8 w-full">
       <div class="col-span-10 lg:col-span-7">
         <StoryDisplay :story-text="storyData.story" />
@@ -29,13 +38,23 @@
           :is-validating="isValidating"
           :is-correct="isCorrect"
           :show-result="showResult"
+          :awaiting-retry="awaitingRetry"
+          :hint="hintText"
           @submit-answer="checkAnswer"
           @next-step="handleNextStep"
           @regenerate="regenerateQuestion"
           @force-tier="forceTier"
+          @fill-correct="debugFillCorrectAnswer"
         />
       </div>
     </div>
+
+    <!-- Continuation Modal -->
+    <ContinuationModal 
+      :show="showContinuationModal"
+      @continue="continueOnSameTopic"
+      @switch="switchToNewTopic"
+    />
   </main>
 </template>
 
@@ -44,11 +63,17 @@ import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { getStudentState, selectNextKC, updateKCMastery } from '~/utils/studentModel';
+import { tijdvakken } from '~/data';
+import { logger } from '~/utils/logger';
 import StoryDisplay from '~/components/pages/story/StoryDisplay.vue';
 import QuizPanel from '~/components/pages/story/QuizPanel.vue';
+import ContinuationModal from '~/components/pages/story/ContinuationModal.vue';
 
 const { t } = useI18n();
 const router = useRouter();
+const localePath = useLocalePath();
+
+// --- Component State ---
 const storyData = ref(null);
 const isLoading = ref(true);
 const allLearned = ref(false);
@@ -56,9 +81,17 @@ const showResult = ref(false);
 const currentKC = ref(null);
 const currentMastery = ref(0);
 const currentAttempts = ref(0);
+const isAIEvaluatedCorrect = ref(null);
+const awaitingRetry = ref(false);
+const hintText = ref(null);
+
+// --- Loop State ---
+const questionCountInLoop = ref(0);
+const showContinuationModal = ref(false);
+
+// --- Debug & API State ---
 const forcedMastery = ref(null);
 const isValidating = ref(false);
-const isAIEvaluatedCorrect = ref(null);
 const generationApiStatus = ref(null);
 const validationApiStatus = ref(null);
 
@@ -66,15 +99,42 @@ useHead({
   title: t('story.title'),
 });
 
-const isMCQ = computed(() => storyData.value && Array.isArray(storyData.value.options));
+// --- Helper Functions ---
+const getActiveKenmerkendAspect = () => {
+  if (typeof window === 'undefined') return null;
+  const activeAspectKey = sessionStorage.getItem('activeAspectKey');
+  if (!activeAspectKey) return null;
+  for (const tijdvak of tijdvakken) {
+    const aspect = tijdvak.aspecten.find(a => a.id === activeAspectKey);
+    if (aspect) return aspect;
+  }
+  return null;
+};
 
+const calculateAverageMastery = () => {
+  const studentState = getStudentState();
+  const currentAspect = getActiveKenmerkendAspect();
+  if (!studentState || !currentAspect || !currentAspect.knowledgeComponents) return 0;
+
+  const kcsForTopic = currentAspect.knowledgeComponents;
+  const totalMastery = kcsForTopic.reduce((sum, kc) => {
+    return sum + (studentState[kc.id]?.mastery || 0);
+  }, 0);
+
+  return kcsForTopic.length > 0 ? totalMastery / kcsForTopic.length : 0;
+};
+
+// --- Core Logic ---
 const fetchStoryData = async () => {
   isLoading.value = true;
+  storyData.value = null;
   showResult.value = false;
   isAIEvaluatedCorrect.value = null;
-  validationApiStatus.value = null;
-
+  awaitingRetry.value = false;
+  hintText.value = null;
+  
   const masteryScoreToSend = forcedMastery.value ?? currentMastery.value;
+  logger.info('StoryPage', 'Fetching story for KC:', { id: currentKC.value.id, mastery: masteryScoreToSend });
 
   try {
     const response = await $fetch('/api/stories', {
@@ -85,16 +145,16 @@ const fetchStoryData = async () => {
     storyData.value = response;
   } catch (error) {
     generationApiStatus.value = 'Error';
-    console.error("[StoryPage] Could not load story for KC:", error);
+    logger.error('StoryPage', 'Could not load story for KC.', error);
   } finally {
     isLoading.value = false;
   }
 };
 
-onMounted(() => {
+const loadNextQuestion = () => {
   const studentState = getStudentState();
   const nextKC = selectNextKC();
-  
+
   if (nextKC) {
     currentKC.value = nextKC;
     const kcState = studentState[nextKC.id];
@@ -105,98 +165,129 @@ onMounted(() => {
     allLearned.value = true;
     isLoading.value = false;
   }
-});
-
-const isCorrect = computed(() => {
-  if (showResult.value === false) return false;
-  
-  if (isAIEvaluatedCorrect.value !== null) {
-    return isAIEvaluatedCorrect.value;
-  }
-  
-  // This will be calculated based on the result from the QuizPanel's submission event
-  return false; 
-});
-
-const masteryTier = computed(() => {
-  const masteryToCheck = forcedMastery.value ?? currentMastery.value;
-  if (masteryToCheck < 0.40) return 'Tier 1 (Low)';
-  if (masteryToCheck < 0.85) return 'Tier 2 (Medium)';
-  return 'Tier 3 (High)';
-});
-
-const debugInfo = computed(() => ({
-  kcId: currentKC.value?.id,
-  attempts: currentAttempts.value,
-  mastery: currentMastery.value,
-  masteryTier: masteryTier.value,
-  generationApiStatus: generationApiStatus.value,
-  validationApiStatus: validationApiStatus.value,
-  isForced: forcedMastery.value !== null,
-}));
-
-
-const handleNextStep = () => {
-  if (storyData.value?.kcId && forcedMastery.value === null) {
-    updateKCMastery(storyData.value.kcId, isCorrect.value);
-  }
-  forcedMastery.value = null; 
-  router.go(0); 
 };
 
 const checkAnswer = async ({ answer, values }) => {
   if (answer === null || (typeof answer === 'string' && !answer.trim())) return;
 
   let isAnswerCorrect;
+  const isMCQ = Array.isArray(storyData.value.options);
 
-  if (isMCQ.value) {
+  if (isMCQ) {
     isAnswerCorrect = answer === storyData.value.correctAnswerIndex;
-    isAIEvaluatedCorrect.value = isAnswerCorrect;
   } else {
-    const isTier3 = masteryTier.value.startsWith('Tier 3');
-    if (isTier3) {
+    const isAdvanced = masteryTier.value.startsWith('Advanced');
+    if (isAdvanced) {
       isValidating.value = true;
-      validationApiStatus.value = 'Pending...';
       try {
-        const response = await $fetch('/api/stories/validate-answer', {
-          method: 'POST',
-          body: {
-            userAnswer: values.userAnswer,
-            question: storyData.value.question,
-            modelAnswer: storyData.value.correctAnswer
-          }
-        });
-        validationApiStatus.value = '200 OK';
+        const response = await $fetch('/api/stories/validate-answer', { /* ... */ });
         isAnswerCorrect = response.isCorrect;
-        isAIEvaluatedCorrect.value = isAnswerCorrect;
-      } catch (error) {
-        validationApiStatus.value = 'Error';
-        console.error('Error validating answer with AI:', error);
-        isAnswerCorrect = false;
-        isAIEvaluatedCorrect.value = false;
-      } finally {
-        isValidating.value = false;
-      }
+      } catch (error) { isAnswerCorrect = false; }
+      finally { isValidating.value = false; }
     } else {
       const formattedUserAnswer = String(values.userAnswer).trim().toLowerCase();
       const formattedCorrectAnswer = String(storyData.value.correctAnswer).trim().toLowerCase();
       isAnswerCorrect = formattedUserAnswer === formattedCorrectAnswer;
-      isAIEvaluatedCorrect.value = isAnswerCorrect;
     }
   }
   
+  const canReceiveHint = !isMCQ && masteryTier.value.startsWith('Advanced') && storyData.value.hint;
+  if (!isAnswerCorrect && canReceiveHint && !awaitingRetry.value) {
+    awaitingRetry.value = true;
+    hintText.value = storyData.value.hint;
+    return;
+  }
+  
+  isAIEvaluatedCorrect.value = isAnswerCorrect;
   showResult.value = true;
 };
 
-const regenerateQuestion = () => {
-    fetchStoryData();
-}
+const handleNextStep = () => {
+  if (storyData.value?.kcId && forcedMastery.value === null) {
+    updateKCMastery(storyData.value.kcId, isAIEvaluatedCorrect.value);
+  }
+  forcedMastery.value = null;
+
+  const newCount = questionCountInLoop.value + 1;
+  questionCountInLoop.value = newCount;
+  sessionStorage.setItem('questionCountInLoop', newCount.toString());
+
+  if (newCount >= 5) {
+    questionCountInLoop.value = 0;
+    sessionStorage.setItem('questionCountInLoop', '0');
+    
+    const avgMastery = calculateAverageMastery();
+    if (avgMastery >= 0.85) {
+      showContinuationModal.value = true;
+    } else {
+      loadNextQuestion();
+    }
+  } else {
+    loadNextQuestion();
+  }
+};
+
+onMounted(() => {
+  questionCountInLoop.value = parseInt(sessionStorage.getItem('questionCountInLoop') || '0');
+  loadNextQuestion();
+});
+
+// --- Computed Properties ---
+const isCorrect = computed(() => showResult.value && isAIEvaluatedCorrect.value);
+
+const masteryTier = computed(() => {
+  const mastery = forcedMastery.value ?? currentMastery.value;
+  if (mastery < 0.5) return 'Beginner (Score 0-0.5)';
+  if (mastery < 0.75) return 'Intermediate (Score 0.5-0.75)';
+  return 'Advanced (Score >0.75)';
+});
+
+const debugInfo = computed(() => ({
+  kcId: currentKC.value?.id,
+  attempts: currentAttempts.value,
+  mastery: currentMastery.value.toFixed(2),
+  masteryTier: masteryTier.value,
+  generationApiStatus: generationApiStatus.value,
+  validationApiStatus: validationApiStatus.value,
+  isForced: forcedMastery.value !== null,
+}));
+
+// --- Modal Handlers ---
+const continueOnSameTopic = () => {
+  showContinuationModal.value = false;
+  loadNextQuestion();
+};
+
+const switchToNewTopic = () => {
+  showContinuationModal.value = false;
+  router.push(localePath('/'));
+};
+
+// --- Debug Functions ---
+const regenerateQuestion = () => fetchStoryData();
 
 const forceTier = (tier) => {
-    if (tier === 1) forcedMastery.value = 0.1;
-    if (tier === 2) forcedMastery.value = 0.6;
-    if (tier === 3) forcedMastery.value = 0.9;
-    fetchStoryData();
-}
+  if (tier === 1) forcedMastery.value = 0.2;
+  else if (tier === 2) forcedMastery.value = 0.6;
+  else if (tier === 3) forcedMastery.value = 0.9;
+  fetchStoryData();
+};
+
+const debugFillCorrectAnswer = () => {
+  if (!storyData.value) return;
+  const isMCQ = Array.isArray(storyData.value.options);
+  const answer = isMCQ ? storyData.value.correctAnswerIndex : storyData.value.correctAnswer;
+  const values = isMCQ ? {} : { userAnswer: storyData.value.correctAnswer };
+  checkAnswer({ answer, values });
+};
 </script>
+
+<style scoped>
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+</style>
 

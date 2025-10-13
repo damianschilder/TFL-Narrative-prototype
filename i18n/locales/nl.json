@@ -1,21 +1,35 @@
 {
-  "nav": {
-    "start": "Start",
-    "progress": "Voortgang"
+  "app": {
+    "desktop_only_title": "Desktop ervaring",
+    "desktop_only_message": "Deze applicatie is momenteel geoptimaliseerd voor een desktop-ervaring. Open deze pagina op een groter scherm."
+  },
+  "errors": {
+    "loginFailed": "Inlogpoging mislukt. Controleer je gegevens.",
+    "incorrectPassword": "Het ingevoerde wachtwoord is onjuist."
   },
   "home": {
-    "title": "Verhalend Leren",
+    "title": "Verhalend leren",
     "subtitle": "Een adaptief leersysteem dat complexe onderwerpen transformeert in boeiende verhalen om de cognitieve belasting te verminderen.",
-    "topic_selection_title": "Kies een onderwerp om te beginnen",
-    "reset_progress": "Alle Voortgang Resetten",
+    "tijdvak_selection_title": "1. Kies een Historisch Tijdvak",
+    "aspect_selection_title": "2. Kies een Kenmerkend Aspect",
+    "aspects_available": "{available} van {total} aspecten beschikbaar",
+    "start_learning": "Start met Leren",
+    "coming_soon": "Binnenkort Beschikbaar",
+    "reset_progress": "Alle voortgang resetten",
     "reset_success": "Voortgang succesvol gewist!"
   },
-  "progress": {
-    "title": "Jouw Voortgang",
-    "title_with_topic": "Jouw Voortgang: {topic}",
-    "subtitle": "Volg je beheersing van elke kenniscomponent.",
-    "no_topic": "Je hebt nog geen leersessie gestart.",
-    "button_start": "Selecteer een Onderwerp om te Beginnen",
+  "status": {
+    "loading": "Laden...",
+    "loadingApp": "Applicatie laden..."
+  },
+  "kcs": {
+    "prop-kc1": { "name": "Definitie van Propaganda" },
+    "prop-kc2": { "name": "Communicatiemiddelen" },
+    "prop-kc3": { "name": "Massaorganisaties" },
+    "prop-kc4": { "name": "Analyse van propagandaposters" },
+    "prop-kc5": { "name": "De rol van de radio" },
+    "prop-kc6": { "name": "Impact op de bevolking" },
+    "prop-kc7": { "name": "Misvatting: Propaganda als leugens" },
     "categories": {
       "What": "Wat",
       "How": "Hoe",
@@ -23,23 +37,87 @@
       "Misconceptions": "Misvattingen"
     }
   },
+  "nav": {
+    "start": "Start",
+    "progress": "Voortgang",
+    "logout": "Uitloggen en sessie wissen"
+  },
+  "pages": {
+    "login": {
+      "title": "Toegang vereist",
+      "subtitle": "Voer het wachtwoord in om door te gaan.",
+      "form": {
+        "passwordLabel": "Wachtwoord",
+        "passwordPlaceholder": "Wachtwoord",
+        "submitButton": "Ontgrendelen",
+        "submitButtonLoading": "Verifiëren..."
+      }
+    }
+  },
+  "progress": {
+    "title": "Jouw Voortgang",
+    "title_with_topic": "Jouw Voortgang: {topic}",
+    "subtitle": "Volg je beheersing van elke kenniscomponent.",
+    "selection_subtitle": "Selecteer een onderwerp om je voortgang te bekijken.",
+    "select_other_topic": "Kies een ander onderwerp",
+    "no_progress_title": "Nog Geen Voortgang",
+    "no_progress_subtitle": "Start een leersessie om je voortgang hier te zien.",
+    "kpi": {
+      "average_mastery": "Gem. Beheersing",
+      "current_level": "Niveau",
+      "total_attempts": "Pogingen",
+      "completed_kcs": "Voltooid"
+    },
+    "chart": {
+      "title": "Beheersingsoverzicht per Component"
+    },
+    "history_chart": {
+      "title": "Beheersing over Tijd",
+      "no_data": "Nog geen voortgangsgeschiedenis. Beantwoord vragen om je voortgang te zien."
+    },
+    "grid": {
+      "mastery": "Beheersing",
+      "attempts": "Pogingen"
+    },
+    "levels": {
+      "beginner": "Beginner",
+      "intermediate": "Gevorderd",
+      "advanced": "Expert",
+      "expert": "Meester",
+      "mastered": "Beheerst",
+      "practicing": "Aan het oefenen",
+      "needs_review": "Herhaling nodig"
+    }
+  },
   "story": {
     "title": "Leersessie",
     "loading_text": "Je volgende leerhoofdstuk wordt gegenereerd...",
-    "story_title": "Jouw Verhaalhoofdstuk",
+    "story_title": "Jouw verhaalhoofdstuk",
+    "all_learned_title": "Module Voltooid!",
+    "all_learned_message": "Je hebt alle kenniscomponenten voor dit onderwerp succesvol afgerond. Goed gedaan!",
+    "back_to_selection": "Terug naar Onderwerpselectie",
+    "view_progress": "Bekijk Mijn Voortgang",
     "quiz": {
-      "title": "Test je Begrip",
+      "title": "Test je begrip",
       "placeholder": "Typ hier je antwoord...",
-      "button": "Antwoord Bevestigen",
-      "next_button": "Volgende Vraag",
+      "button": "Antwoord bevestigen",
+      "retry_button": "Probeer opnieuw",
+      "hint_title": "Hier is een hint:",
+      "next_button": "Volgende vraag",
       "correct": "Correct!",
       "incorrect": "Niet helemaal, laten we het nog eens bekijken.",
       "correct_answer_was": "Het juiste antwoord was:"
     },
     "completion": {
-      "title": "Module Voltooid!",
+      "title": "Module voltooid!",
       "subtitle": "Je hebt alle onderwerpen in deze module succesvol afgerond.",
-      "button": "Bekijk Mijn Voortgang"
+      "button": "Bekijk mijn voortgang"
+    },
+    "continuation": {
+      "title": "Goede Vooruitgang!",
+      "message": "Je hebt een goed begrip van dit onderwerp. Wil je doorgaan met oefenen of een nieuw onderwerp kiezen?",
+      "continue_button": "Doorgaan met dit onderwerp",
+      "switch_button": "Kies een nieuw onderwerp"
     },
     "debug": {
       "kc_id": "KC ID:",
@@ -49,35 +127,21 @@
       "gen_api": "Gen API:",
       "val_api": "Val API:",
       "testing_controls": "Testknoppen",
-      "regenerate": "Opnieuw",
+      "regenerate": "Opnieuw genereren",
       "force_tier": "Forceer N{tier}",
-      "forced_tier_active": "Geforceerd Niveau Actief"
+      "forced_tier_active": "Geforceerd niveau actief"
     }
   },
-  "app": {
-    "desktop_only_title": "Desktop Ervaring",
-    "desktop_only_message": "Deze applicatie is momenteel geoptimaliseerd voor een desktop-ervaring. Open deze pagina op een groter scherm."
-  },
-  "topics": {
-    "ww2": {
-      "title": "Tweede Wereldoorlog",
-      "description": "Een module over de belangrijkste gebeurtenissen, figuren en concepten van de Tweede Wereldoorlog, gebaseerd op het middelbareschoolcurriculum."
+  "kenmerkende_aspecten": {
+    "ka-propaganda": {
+      "title": "De rol van moderne propaganda- en massaorganisatie",
+      "description": "Een module over het gebruik van moderne communicatiemiddelen en massaorganisaties om de publieke opinie te beïnvloeden tijdens het tijdperk van de Wereldoorlogen."
     }
   },
-  "kcs": {
-    "kc1": { "name": "Tijdlijn WOII" },
-    "kc2": { "name": "Interbellum Condities" },
-    "kc3": { "name": "Invasie van Polen" },
-    "kc6": { "name": "Hitlers Ideologie" },
-    "kc9": { "name": "Impact van Bezetting" },
-    "kc13": { "name": "Van Isolationisme naar Allianties" },
-    "kc14": { "name": "Volgorde WOII Gebeurtenissen" },
-    "kc16": { "name": "Analyseer Propaganda" },
-    "kc17": { "name": "Val van Fascistische Regimes" },
-    "kc22": { "name": "Impact van de Holocaust" },
-    "kc25": { "name": "Naoorlogse Mensenrechten" },
-    "kc27": { "name": "Misvatting: Enige Oorzaak" },
-    "kc28": { "name": "Misvatting: Toetreding VS" },
-    "kc29": { "name": "Misvatting: Atoombommen" }
+  "tijdvakken": {
+    "tijdvak-9": {
+      "title": "Tijd van de Wereldoorlogen",
+      "period": "1900 - 1950"
+    }
   }
 }

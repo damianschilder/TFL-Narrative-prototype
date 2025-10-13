@@ -20,13 +20,31 @@
         <ClientOnly>
           <SharedLanguageSwitcher />
         </ClientOnly>
+
+        <button
+          v-if="loggedIn"
+          :aria-label="t('nav.logout')"
+          @click="handleLogout"
+          class="inline-flex items-center justify-center text-muted-foreground hover:text-primary transition-colors"
+        >
+          <span class="material-symbols-outlined">logout</span>
+        </button>
       </div>
     </div>
   </header>
 </template>
 
-<script setup>
-import { useI18n } from 'vue-i18n';
+<script setup lang="ts">
+import { logger } from '~/utils/logger'
 
-const { t } = useI18n();
+const { t } = useI18n()
+const { loggedIn, clear: clearSession } = useUserSession()
+
+async function handleLogout() {
+  const source = 'Component: SharedNavbar'
+  logger.info(source, 'Logout button clicked.')
+  await clearSession()
+  logger.info(source, 'Session cleared.')
+  await navigateTo('/login')
+}
 </script>

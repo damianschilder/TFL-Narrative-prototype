@@ -4,12 +4,12 @@
     <div class="w-full max-w-sm">
       <form @submit.prevent="handleLogin" class="card-glass p-8 space-y-6">
         <div class="text-center">
-          <h1 class="text-2xl font-bold text-foreground">Access Required</h1>
-          <p class="text-muted-foreground text-sm mt-2">Please enter the password to continue.</p>
+          <h1 class="text-2xl font-bold text-foreground">{{ t('pages.login.title') }}</h1>
+          <p class="text-muted-foreground text-sm mt-2">{{ t('pages.login.subtitle') }}</p>
         </div>
         
         <div>
-          <label for="password" class="sr-only">Password</label>
+          <label for="password" class="sr-only">{{ t('pages.login.form.passwordLabel') }}</label>
           <input
             id="password"
             v-model="password"
@@ -18,7 +18,7 @@
             required
             class="w-full rounded-lg border bg-secondary/30 px-4 py-3 text-base text-foreground transition-all focus:ring-2 focus:ring-offset-2 focus:ring-offset-card focus:border-primary"
             :class="{ 'border-destructive': error }"
-            placeholder="Password"
+            :placeholder="t('pages.login.form.passwordPlaceholder')"
           />
           <p v-if="error" class="mt-2 text-sm text-destructive">
             {{ error }}
@@ -34,48 +34,51 @@
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          <span>{{ isLoading ? 'Verifying...' : 'Unlock' }}</span>
+          <span>{{ isLoading ? t('pages.login.form.submitButtonLoading') : t('pages.login.form.submitButton') }}</span>
         </button>
       </form>
     </div>
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue';
-import { useAuthStore } from '~/stores/auth';
+<script setup lang="ts">
+import { ref } from 'vue'
+import { logger } from '~/utils/logger'
 
-// Tell Nuxt to use a minimal layout for this page
 definePageMeta({
   layout: 'auth',
-  // Make this page accessible to unauthenticated users
-  auth: {
-    unauthenticatedOnly: true,
-    navigateAuthenticatedTo: '/',
-  }
-});
+})
 
-const password = ref('');
-const error = ref(null);
-const isLoading = ref(false);
-const authStore = useAuthStore();
-const router = useRouter();
+const password = ref('')
+const error = ref<string | null>(null)
+const isLoading = ref(false)
+const { fetch: refreshSession } = useUserSession()
+const { t } = useI18n()
 
-const handleLogin = async () => {
-  isLoading.value = true;
-  error.value = null;
+async function handleLogin() {
+  const source = 'Page: /login'
+  logger.info(source, 'handleLogin triggered.')
+  isLoading.value = true
+  error.value = null
   try {
     await $fetch('/api/auth/login', {
       method: 'POST',
       body: { password: password.value },
-    });
-    // If successful, update state and redirect
-    authStore.login();
-    await router.push('/');
-  } catch (err) {
-    error.value = 'The password you entered is incorrect.';
-  } finally {
-    isLoading.value = false;
+    })
+    logger.info(source, 'Login API call successful.')
+
+    await refreshSession()
+    logger.info(source, 'Client session refreshed.')
+
+    await navigateTo('/')
   }
-};
+  catch (err) {
+    logger.error(source, 'Caught error during login process:', err)
+    error.value = t('errors.incorrectPassword')
+  }
+  finally {
+    isLoading.value = false
+    logger.info(source, 'handleLogin finished.')
+  }
+}
 </script>

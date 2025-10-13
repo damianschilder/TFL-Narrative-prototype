@@ -17,8 +17,8 @@ export default defineNuxtConfig({
     session: {
       name: '__session',
       password: process.env.SESSION_SECRET,
-      // Use JSON Web Tokens for sessions
-      jwt: true
+      jwt: true,
+      maxAge: 86400
     },
     gemini: {
       apiKey: process.env.GEMINI_API_KEY,
@@ -29,12 +29,7 @@ export default defineNuxtConfig({
     }
   },
 
-  modules: [
-    '@nuxtjs/tailwindcss',
-    '@nuxtjs/i18n',
-    '@pinia/nuxt',
-    'nuxt-security'
-  ],
+  modules: ['@nuxtjs/tailwindcss', '@nuxtjs/i18n', '@pinia/nuxt', 'nuxt-security', 'nuxt-auth-utils'],
 
   security: {
     // The `sessions` block has been removed from here and merged into runtimeConfig

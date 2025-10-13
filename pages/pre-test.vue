@@ -84,7 +84,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 
 const questions = ref([]);
 const currentQuestionIndex = ref(0);
@@ -92,7 +92,8 @@ const userAnswers = ref([]);
 const isLoading = ref(true);
 const router = useRouter();
 const localePath = useLocalePath();
-const isDev = process.env.NODE_ENV === 'development';
+// The debug panel is now always enabled.
+const isDev = true;
 
 const currentQuestion = computed(() => questions.value[currentQuestionIndex.value]);
 const progressPercentage = computed(() => `${((currentQuestionIndex.value + 1) / (questions.value.length || 1)) * 100}%`);

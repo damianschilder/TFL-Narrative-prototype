@@ -1,4 +1,4 @@
-# KenDieAspecten (Narrative Tutor Prototype)
+# KenDieAspecten
 
 KenDieAspecten is an innovative adaptive educational platform designed to teach historical concepts through engaging, AI-generated narratives. This application, developed as the "Narrative Tutor" prototype, leverages the power of generative AI to create dynamic and personalized learning experiences.
 

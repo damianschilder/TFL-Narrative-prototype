@@ -127,7 +127,7 @@ The domain model is the pedagogical foundation of the system. It is structured h
 
 1. **Tijdvakken** (Historical Periods): The highest level (e.g., "Era of World Wars").
     
-2. **Kenmerkende Aspecten** (Characteristic Aspects): The key concepts for each period (e.g., "The role of modern propaganda").
+2. **Kenmerkende Aspecten**: The key concepts for each period (e.g., "The role of modern propaganda").
     
 3. **Knowledge Components (KCs)**: Atomic learning objectives for each aspect (e.g., "Define propaganda," "Analyze a propaganda poster"). These KCs are further categorized into `What` (declarative), `How` (procedural), `So what?` (interpretation), and `Misconceptions`.
     
